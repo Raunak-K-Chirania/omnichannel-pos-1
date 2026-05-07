@@ -7,7 +7,7 @@ export interface IInventory extends Document {
     reorderPoint:number;
     lastUpdated:Date;
 }
-const InventorySchema:Schema = new Schema<IInventory>({
+const InventorySchema:Schema<IInventory> = new Schema<IInventory>({
     product:{
         type: Schema.Types.ObjectId,
         ref:"Product",

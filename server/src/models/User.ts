@@ -6,7 +6,7 @@ export interface IUser extends Document {
   password: string;
   role: "cashier" | "manager" | "admin";
   store: mongoose.Types.ObjectId;
-  comparePassword(candidatePassword: string): Promise<boolean>;
+  matchPassword(candidatePassword: string): Promise<boolean>;
 }
 const UserSchema: Schema<IUser> = new Schema(
   {
@@ -49,8 +49,8 @@ UserSchema.pre("save", async function (next) {
      next();
 });
 // method to compare password
-UserSchema.methods.comparePassword = async function (candidatePassword: string) {
-  return await bcrypt.compare(candidatePassword, this.password);
+UserSchema.methods.matchPassword = async function (enteredPassword: string) {
+  return await bcrypt.compare(enteredPassword, this.password);
 };
 //model
 const User = mongoose.model<IUser>("User", UserSchema);
