@@ -2,7 +2,7 @@ import mongoose, { Document,Schema } from "mongoose";
 export interface IStore extends Document {
     name: string;
     location: string;
-    IsActive: boolean;
+    isActive: boolean;
 }
 const StoreSchema: Schema<IStore> = new Schema({
     name:{
@@ -15,7 +15,7 @@ const StoreSchema: Schema<IStore> = new Schema({
         required: true,
         trim: true,
     },
-    IsActive:{
+    isActive:{
         type: Boolean,
         default: true,
     }

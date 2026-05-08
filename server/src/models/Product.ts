@@ -36,7 +36,7 @@ const VariantSchema: Schema<IVariant> = new Schema({
     },
     stock:{
         type: Number,
-        required: true,
+        default: 0,
     }
 },{ _id: false });
 const ProductSchema:Schema<IProduct> = new Schema({
