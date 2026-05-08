@@ -8,6 +8,10 @@ import productRoutes from "./routes/productRoutes";
 import inventoryRoutes from "./routes/inventoryRoutes";
 import orderRoutes from "./routes/orderRoutes";
 
+// For testing in swagger UI and Postman, we need to allow CORS from all origins. In production, you should restrict this to your frontend domain.
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./config/swagger";
+
 import { errorHandler, notFound } from "./middleware/errorMiddleware";
 
 const app = express();
@@ -34,6 +38,9 @@ app.get("/", (req, res) => {
 app.get("/favicon.ico", (req, res) => {
   res.status(204).end();
 });
+
+// Swagger API Docs Route
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
 // API Routes
