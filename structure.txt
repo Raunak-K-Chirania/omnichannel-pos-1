@@ -1,3 +1,4 @@
+
 omnichannel-pos/
 │
 ├── .github/
@@ -108,4 +109,116 @@ omnichannel-pos/
 ├── .env                            # root env (never commit this)
 ├── .env.example                    # safe to commit — template
 ├── .gitignore
+
+omnichannel-pos/
+│
+├── .github/
+│   └── workflows/
+│       └── ci.yml                  # GitHub Actions — lint, typecheck, test on PR
+│
+├── client/                         # React + TypeScript Frontend
+│   ├── src/
+│   │   ├── assets/
+│   │   │
+│   │   ├── components/
+│   │   │   ├── Navbar.tsx
+│   │   │   ├── Sidebar.tsx
+│   │   │   └── ProductCard.tsx
+│   │   │
+│   │   ├── pages/
+│   │   │   ├── Login.tsx
+│   │   │   ├── Dashboard.tsx
+│   │   │   ├── POS.tsx
+│   │   │   ├── Products.tsx
+│   │   │   ├── Inventory.tsx
+│   │   │   └── Orders.tsx
+│   │   │
+│   │   ├── services/
+│   │   │   ├── api.ts              # axios instance with base URL + interceptors
+│   │   │   ├── authService.ts
+│   │   │   ├── productService.ts
+│   │   │   └── orderService.ts
+│   │   │
+│   │   ├── store/
+│   │   │   ├── index.ts            # Redux store setup
+│   │   │   ├── authSlice.ts
+│   │   │   ├── cartSlice.ts
+│   │   │   └── productSlice.ts
+│   │   │
+│   │   ├── types/
+│   │   │   ├── auth.types.ts       # User, LoginPayload, AuthState
+│   │   │   ├── product.types.ts    # Product, Variant, SKU
+│   │   │   ├── order.types.ts      # Order, OrderItem, OrderStatus
+│   │   │   └── cart.types.ts       # CartItem, CartState
+│   │   │
+│   │   ├── hooks/
+│   │   │   ├── useAuth.ts          # custom hook for auth state
+│   │   │   └── useCart.ts          # custom hook for cart operations
+│   │   │
+│   │   ├── App.tsx
+│   │   ├── main.tsx
+│   │   └── vite-env.d.ts           # Vite type declarations
+│   │
+│   ├── package.json
+│   ├── vite.config.ts              # vite config in TS
+│   └── tsconfig.json               # strict: true, jsx: react-jsx
+│
+├── server/                         # Node + Express + TypeScript Backend
+│   ├── src/
+│   │   ├── config/
+│   │   │   ├── db.ts               # Mongoose connect
+│   │   │   └── redis.ts            # ioredis client setup
+│   │   │
+│   │   ├── models/
+│   │   │   ├── User.ts             # IUser interface + schema
+│   │   │   ├── Store.ts            # IStore interface + schema
+│   │   │   ├── Product.ts          # IProduct + variants/SKU schema
+│   │   │   ├── Inventory.ts        # IInventory + ledger schema
+│   │   │   ├── Order.ts            # IOrder + status enum
+│   │   │   └── OrderItem.ts        # IOrderItem schema
+│   │   │
+│   │   ├── controllers/
+│   │   │   ├── authController.ts
+│   │   │   ├── productController.ts
+│   │   │   ├── inventoryController.ts
+│   │   │   └── orderController.ts
+│   │   │
+│   │   ├── routes/
+│   │   │   ├── authRoutes.ts
+│   │   │   ├── productRoutes.ts
+│   │   │   ├── inventoryRoutes.ts
+│   │   │   └── orderRoutes.ts
+│   │   │
+│   │   ├── middleware/
+│   │   │   ├── authMiddleware.ts   # JWT verify → req.user typed
+│   │   │   ├── roleMiddleware.ts   # RBAC: Cashier | Manager | Admin
+│   │   │   └── errorMiddleware.ts  # Global error handler typed
+│   │   │
+│   │   ├── types/
+│   │   │   ├── express.d.ts        # Extend Express Request with user
+│   │   │   ├── product.types.ts
+│   │   │   ├── order.types.ts
+│   │   │   └── inventory.types.ts
+│   │   │
+│   │   ├── utils/
+│   │   │   ├── generateToken.ts    # returns typed JWT string
+│   │   │   └── calculateTotal.ts   # typed cart total calculator
+│   │   │
+│   │   ├── __tests__/
+│   │   │   ├── auth.test.ts        # Vitest — auth logic tests
+│   │   │   ├── inventory.test.ts   # atomic transaction tests
+│   │   │   └── product.test.ts     # CRUD + pagination tests
+│   │   │
+│   │   ├── app.ts                  # Express app setup
+│   │   └── server.ts               # Entry point — listens on PORT
+│   │
+│   ├── package.json
+│   ├── tsconfig.json               # target: ES2020, module: commonjs
+│   └── Dockerfile
+│
+├── docker-compose.yml              # MongoDB + Redis services
+├── .env                            # root env (never commit this)
+├── .env.example                    # safe to commit — template
+├── .gitignore
+
 └── README.md
