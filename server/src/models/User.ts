@@ -1,9 +1,7 @@
 import mongoose, { Document, Schema } from "mongoose";
 import bcrypt from "bcryptjs";
-<<<<<<< HEAD
-=======
+
 export type UserRole = "cashier" | "manager" | "admin";
->>>>>>> main
 export interface IUser extends Document {
   name: string;
   email: string;
