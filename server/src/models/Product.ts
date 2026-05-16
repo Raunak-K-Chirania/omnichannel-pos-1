@@ -15,6 +15,7 @@ export interface IProduct extends Document {
     variants: IVariant[];
     store: mongoose.Types.ObjectId;
     isActive: boolean;
+    stock: number;
 }
 const VariantSchema: Schema<IVariant> = new Schema({
     size: {

@@ -1,108 +1,283 @@
-import {Request, Response} from 'express';
-import Product from '../models/Product';
-import redisClient from '../config/redis';
+import { Request, Response } from "express";
+import mongoose from "mongoose";
+import Product from "../models/Product";
+import redisClient from "../config/redis";
 
-const CACHE_PREFIX = 'products:';
+const CACHE_PREFIX = "products:";
 const CACHE_TTL = 300; // 5 minutes
 
-// clear cache
-const clearProductCache = async ()=>{
-    const keys = await redisClient.keys(`${CACHE_PREFIX}*`);
-    if(keys.length > 0){
-        await redisClient.del(keys);
-    }
+
+// -----------------------------------------
+// CLEAR PRODUCT CACHE
+// -----------------------------------------
+
+const clearProductCache = async () => {
+  const keys = await redisClient.keys(`${CACHE_PREFIX}*`);
+
+  if (keys.length > 0) {
+    await redisClient.del(keys);
+  }
 };
-// create a new product
-// post /api/products
-// access manager admin
-const createProduct = async (req: Request, res: Response) : Promise<void> => {
+
+
+// -----------------------------------------
+// CREATE PRODUCT
+// POST /api/products
+// ACCESS: manager, admin
+// -----------------------------------------
+
+const createProduct = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+
     const product = await Product.create(req.body);
+
+    // Clear cache after create
     await clearProductCache();
+
     res.status(201).json(product);
 
+  } catch (error) {
+
+  console.error("CREATE PRODUCT ERROR:");
+  console.error(error);
+
+  res.status(500).json({
+    message: "Failed to create product",
+    error,
+});
+}
 };
-// get all products
-// get /api/products
-// access public
-const getProducts = async (req: Request, res: Response) : Promise<void> => {
-    const {search, category , cursor , limit = 20} = req.query;
-    const cacheKey =`${CACHE_PREFIX}${JSON.stringify(req.query)}`;
-    const cachedData = await redisClient.get(cacheKey);
-    if(cachedData){
-        res.json(JSON.parse(cachedData));
-        return;
+
+// -----------------------------------------
+// GET PRODUCTS
+// GET /api/products
+// ACCESS: public
+// FEATURES:
+// - cursor pagination
+// - search
+// - category filter
+// - redis caching
+// -----------------------------------------
+
+const getProducts = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+
+  try {
+
+    const {
+      search,
+      category,
+      cursor,
+      limit = 20,
+    } = req.query;
+
+    // Create cache key
+    const cacheKey =
+      `${CACHE_PREFIX}${JSON.stringify(req.query)}`;
+
+    // Check Redis cache
+    const cachedData =
+      await redisClient.get(cacheKey);
+
+    // Cache hit
+    if (cachedData) {
+      res.json(JSON.parse(cachedData));
+      return;
     }
 
-    // buid mongoDB query
-    const query: Record<string, any> = {isActive: true};
-    if(search){
-        query.$text = {$search: search as string};
-    }
-    if(category){
-        query.category = category;
-    }
-    // cursor based pagination
-  // only return products with _id greater than the cursor
-    if(cursor){
-        query._id = {$gt: cursor};
-    }
-
-    const products = await Product.find(query).limit(Number(limit)).sort({_id:1});
-    const result ={
-        products,
-        nextCursor: products.length === Number(limit) ? products[products.length - 1]._id : null
+    // MongoDB query
+    const query: Record<string, any> = {
+      isActive: true,
     };
-    // store result in redis cache
-     await redisClient.setex(cacheKey, CACHE_TTL, JSON.stringify(result));
-    res.json(result);
-};
 
-// get product by id
-// get /api/products/:id
-// access public
-const getProductById = async (req: Request, res: Response) : Promise<void> => {
-    const product = await Product.findById(req.params.id);
-    if(!product){
-        res.status(404).json({message: 'Product not found'});
-        return;
+    // Full text search
+    if (search) {
+      query.$text = {
+        $search: search as string,
+      };
     }
-    res.json(product);
-};
 
-// update product
-// put /api/products/:id
-// access manager admin
-const updateProduct = async (req: Request, res: Response) : Promise<void> => {
-    const product = await Product.findByIdAndUpdate(req.params.id,
-        req.body,
-        {new: true}    
+    // Category filter
+    if (category) {
+      query.category = category;
+    }
+
+    // Cursor based pagination
+    if (cursor) {
+      query._id = {
+        $gt: new mongoose.Types.ObjectId(
+          cursor as string
+        ),
+      };
+    }
+
+    // Fetch products
+    const products = await Product.find(query)
+      .sort({ _id: 1 })
+      .limit(Number(limit) + 1);
+
+    let nextCursor = null;
+
+    // Check if next page exists
+    if (products.length > Number(limit)) {
+      const nextProduct = products.pop();
+
+      nextCursor = nextProduct?._id;
+    }
+
+    const result = {
+      products,
+      nextCursor,
+    };
+
+    // Store in Redis
+    await redisClient.setex(
+      cacheKey,
+      CACHE_TTL,
+      JSON.stringify(result)
     );
-    if(!product){
-        res.status(404).json({message: 'Product not found'});
-        return;
+
+    res.json(result);
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to fetch products",
+    });
+  }
+};
+
+
+// -----------------------------------------
+// GET PRODUCT BY ID
+// GET /api/products/:id
+// ACCESS: public
+// -----------------------------------------
+
+const getProductById = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+
+  try {
+
+    const product = await Product.findById(
+      req.params.id
+    );
+
+    if (!product) {
+      res.status(404).json({
+        message: "Product not found",
+      });
+      return;
     }
-    await clearProductCache();
+
     res.json(product);
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to fetch product",
+    });
+  }
 };
 
-//delete product
-// delete /api/products/:id
-// access only admin
-const deleteProduct = async (req: Request, res: Response) : Promise<void> => {
-    const product = await Product.findByIdAndDelete(req.params.id);
-    if(!product){
-        res.status(404).json({message: 'Product not found'});
-        return;
+
+// -----------------------------------------
+// UPDATE PRODUCT
+// PUT /api/products/:id
+// ACCESS: manager, admin
+// -----------------------------------------
+
+const updateProduct = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+
+  try {
+
+    const product =
+      await Product.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        {
+          new: true,
+        }
+      );
+
+    if (!product) {
+      res.status(404).json({
+        message: "Product not found",
+      });
+      return;
     }
+
+    // Clear cache after update
     await clearProductCache();
-    res.json({message: 'Product deleted successfully'});
+
+    res.json(product);
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to update product",
+    });
+  }
 };
 
-//
+
+// -----------------------------------------
+// DELETE PRODUCT (SOFT DELETE)
+// DELETE /api/products/:id
+// ACCESS: admin
+// -----------------------------------------
+
+const deleteProduct = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+
+  try {
+
+    const product =
+      await Product.findByIdAndUpdate(
+        req.params.id,
+        {
+          isActive: false,
+        },
+        {
+          new: true,
+        }
+      );
+
+    if (!product) {
+      res.status(404).json({
+        message: "Product not found",
+      });
+      return;
+    }
+
+    // Clear cache after delete
+    await clearProductCache();
+
+    res.json({
+      message: "Product deleted successfully",
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to delete product",
+    });
+  }
+};
+
+
 export default {
-    createProduct,
-    getProducts,
-    getProductById,
-    updateProduct,
-    deleteProduct,
+  createProduct,
+  getProducts,
+  getProductById,
+  updateProduct,
+  deleteProduct,
 };
