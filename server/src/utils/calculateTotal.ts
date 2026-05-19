@@ -1,25 +1,21 @@
-interface CartItem {
+interface Item {
   unitPrice: number;
   quantity: number;
-  discount?: number;
+  discount: number;
 }
 
-interface TotalResult {
-  subtotal: number;
-  tax: number;
-  total: number;
-}
-
-const calculateTotal = (items: CartItem[], taxRate: number = 0.18): TotalResult => {
-  const subtotal = items.reduce((sum, item) => {
-    const discounted = item.unitPrice * (1 - (item.discount || 0) / 100);
-    return sum + discounted * item.quantity;
+export const calculateTotal = (items: Item[], taxRate: number = 0.18) => {
+  const subtotal = items.reduce((acc, item) => {
+    const itemTotal = item.unitPrice * item.quantity * (1 - item.discount / 100);
+    return acc + itemTotal;
   }, 0);
 
-  const tax = parseFloat((subtotal * taxRate).toFixed(2));
-  const total = parseFloat((subtotal + tax).toFixed(2));
+  const tax = subtotal * taxRate;
+  const total = subtotal + tax;
 
-  return { subtotal: parseFloat(subtotal.toFixed(2)), tax, total };
+  return {
+    subtotal: Number(subtotal.toFixed(2)),
+    tax: Number(tax.toFixed(2)),
+    total: Number(total.toFixed(2)),
+  };
 };
-
-export default calculateTotal;
