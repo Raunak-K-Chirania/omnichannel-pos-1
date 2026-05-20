@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { seedDatabase } from "../utils/seeder";
 
 const connectDB = async () => {
   try {
@@ -7,10 +8,13 @@ const connectDB = async () => {
     await mongoose.connect(mongoUri);
 
     console.log("MongoDB connected");
+
+    // Seed the database with default data if empty
+    await seedDatabase();
   } catch (error) {
     console.error("MongoDB connection failed:", error);
     process.exit(1);
   }
 };
 
-export default connectDB;
+export default connectDB;
