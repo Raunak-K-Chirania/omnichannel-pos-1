@@ -136,7 +136,7 @@ export const POS: React.FC = () => {
         discount: i.discount,
       })),
       paymentMethod,
-      storeId: user.store,
+      store: user.store,
       taxRate: 0.18, // 18% tax rate
     };
 
@@ -225,7 +225,7 @@ export const POS: React.FC = () => {
               <span className="text-xs font-semibold text-slate-500">Scanning active inventory...</span>
             </div>
           ) : products.length === 0 ? (
-            <div className="text-center py-24 text-slate-500 border border-dashed border-slate-850 rounded-xl bg-slate-900/10">
+            <div className="text-center py-24 text-slate-500 border border-dashed border-slate-800 rounded-xl bg-slate-900/10">
               <svg className="w-10 h-10 mx-auto text-slate-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
@@ -272,7 +272,7 @@ export const POS: React.FC = () => {
           {/* Cart Item List Container */}
           <div className="overflow-y-auto max-h-[320px] pr-1 space-y-3 mb-4">
             {items.length === 0 ? (
-              <div className="text-center py-20 text-slate-500 border border-dashed border-slate-850 rounded-xl bg-slate-900/10">
+              <div className="text-center py-20 text-slate-500 border border-dashed border-slate-800 rounded-xl bg-slate-900/10">
                 <svg className="w-8 h-8 mx-auto text-slate-700 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
@@ -285,7 +285,7 @@ export const POS: React.FC = () => {
                 return (
                   <div
                     key={item.sku}
-                    className="p-3 bg-slate-900/60 border border-slate-850/80 rounded-xl flex flex-col justify-between gap-2.5 hover:border-slate-800/80 transition-colors"
+                    className="p-3 bg-slate-900/60 border border-slate-800/80 rounded-xl flex flex-col justify-between gap-2.5 hover:border-slate-800/80 transition-colors"
                   >
                     <div className="flex justify-between items-start gap-3">
                       <div>
@@ -303,7 +303,7 @@ export const POS: React.FC = () => {
                       </button>
                     </div>
 
-                    <div className="flex items-center justify-between gap-2.5 mt-1 border-t border-slate-850/60 pt-2 text-[11px]">
+                    <div className="flex items-center justify-between gap-2.5 mt-1 border-t border-slate-800/60 pt-2 text-[11px]">
                       {/* Quantity Controller */}
                       <div className="flex items-center bg-slate-800 border border-slate-700/50 rounded-lg">
                         <button
@@ -328,7 +328,7 @@ export const POS: React.FC = () => {
                           type="number"
                           value={item.discount || 0}
                           onChange={(e) => updateDiscount(item.sku, parseInt(e.target.value) || 0)}
-                          className="w-10 bg-slate-800 border border-slate-700/50 rounded text-center text-[10px] font-bold text-slate-350 py-0.5 focus:outline-none focus:border-indigo-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          className="w-10 bg-slate-800 border border-slate-700/50 rounded text-center text-[10px] font-bold text-slate-300 py-0.5 focus:outline-none focus:border-indigo-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           min="0"
                           max="100"
                         />
@@ -361,7 +361,7 @@ export const POS: React.FC = () => {
               <span>Sales Tax (18%)</span>
               <span className="text-slate-200 font-mono">${tax.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between text-sm font-extrabold text-white pt-2 border-t border-slate-850/60">
+            <div className="flex justify-between text-sm font-extrabold text-white pt-2 border-t border-slate-800/60">
               <span>Order Total</span>
               <span className="text-indigo-400 text-lg font-mono">${total.toFixed(2)}</span>
             </div>
@@ -381,7 +381,7 @@ export const POS: React.FC = () => {
                     onClick={() => setPaymentMethod(method)}
                     className={`py-2 rounded-xl text-[10px] font-bold uppercase transition-all duration-200 border cursor-pointer ${active
                         ? 'bg-indigo-600 border-indigo-500 text-white shadow shadow-indigo-600/10'
-                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-300 hover:bg-slate-850/50'
+                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50'
                       }`}
                   >
                     {method.replace('_', ' ')}

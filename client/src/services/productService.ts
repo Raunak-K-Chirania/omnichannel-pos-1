@@ -3,7 +3,7 @@ import api from './api';
 export const productService = {
   async getAll(params?: { search?: string; category?: string; store?: string }) {
     const response = await api.get('/products', { params });
-    return response.data;
+    return response.data.products || [];
   },
 
   async getById(id: string) {

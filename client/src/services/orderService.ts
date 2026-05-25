@@ -11,7 +11,7 @@ export const orderService = {
       discount: number;
     }>;
     paymentMethod: 'cash' | 'credit' | 'digital_wallet';
-    storeId: string;
+    store: string;
     taxRate?: number;
   }) {
     const response = await api.post('/orders', data);
@@ -22,7 +22,7 @@ export const orderService = {
     const response = await api.get('/orders', {
       params: storeId ? { store: storeId } : {},
     });
-    return response.data;
+    return response.data.data || [];
   },
 };
 

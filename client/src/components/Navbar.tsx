@@ -65,9 +65,9 @@ export const Navbar: React.FC = () => {
       {/* User Actions & Profile */}
       {user && (
         <div className="flex items-center space-x-4">
-          <div className="flex flex-col items-end md:flex">
-            <span className="text-sm font-semibold text-slate-200">{user.name}</span>
-            <span className="mt-0.5">{getRoleBadge(user.role)}</span>
+          <div className="flex flex-col items-end hidden md:flex">
+            <span className="text-sm font-semibold text-slate-200">{user.name || 'User'}</span>
+            <span className="mt-0.5">{getRoleBadge(user.role || 'cashier')}</span>
           </div>
           
           <div className="h-8 w-px bg-slate-800 hidden md:block"></div>
@@ -75,7 +75,7 @@ export const Navbar: React.FC = () => {
           {/* Logout Button */}
           <button
             onClick={logout}
-            className="flex items-center justify-center p-2 rounded-xl bg-slate-850 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 border border-slate-800 hover:border-rose-500/20 transition-all duration-200"
+            className="flex items-center justify-center p-2 rounded-xl bg-slate-800 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 border border-slate-800 hover:border-rose-500/20 transition-all duration-200"
             title="Log Out"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

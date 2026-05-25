@@ -95,7 +95,7 @@ export const Products: React.FC = () => {
       description: newProductDesc,
       variants: formattedVariants,
       isActive: true,
-      storeId: user?.store,
+      store: user?.store,
     };
 
     try {
@@ -172,7 +172,7 @@ export const Products: React.FC = () => {
           <span className="text-xs font-semibold text-slate-500">Retrieving catalog items...</span>
         </div>
       ) : products.length === 0 ? (
-        <div className="text-center py-20 text-slate-500 border border-dashed border-slate-850 rounded-xl bg-slate-900/10">
+        <div className="text-center py-20 text-slate-500 border border-dashed border-slate-800 rounded-xl bg-slate-900/10">
           No products matched your parameters or exist in this store.
         </div>
       ) : (
@@ -205,7 +205,7 @@ export const Products: React.FC = () => {
                         </div>
                       </td>
                       <td className="p-4">
-                        <span className="bg-slate-900 border border-slate-850 text-slate-400 px-2 py-0.5 rounded text-[10px] uppercase font-bold">
+                        <span className="bg-slate-900 border border-slate-800 text-slate-400 px-2 py-0.5 rounded text-[10px] uppercase font-bold">
                           {product.category}
                         </span>
                       </td>
@@ -237,7 +237,7 @@ export const Products: React.FC = () => {
                           className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                             product.isActive
                               ? 'bg-emerald-950/80 border border-emerald-500/20 text-emerald-400'
-                              : 'bg-slate-950/80 border border-slate-700/20 text-slate-550'
+                              : 'bg-slate-950/80 border border-slate-700/20 text-slate-500'
                           }`}
                         >
                           {product.isActive ? 'Active' : 'Archived'}
@@ -255,13 +255,13 @@ export const Products: React.FC = () => {
       {/* CREATE PRODUCT MODAL */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-filter backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="glass-panel border border-slate-850 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl animate-scaleUp">
+          <div className="glass-panel border border-slate-800 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl animate-scaleUp">
             {/* Modal Header */}
             <div className="p-5 border-b border-slate-800 flex justify-between items-center bg-slate-900/40">
               <h2 className="text-base font-extrabold text-white tracking-wide">Catalog Creator Terminal</h2>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-slate-500 hover:text-slate-350 cursor-pointer"
+                className="text-slate-500 hover:text-slate-300 cursor-pointer"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
@@ -292,7 +292,7 @@ export const Products: React.FC = () => {
                     value={newProductName}
                     onChange={(e) => setNewProductName(e.target.value)}
                     placeholder="e.g. Vintage Leather Jacket"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-650"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-600"
                   />
                 </div>
                 <div>
@@ -305,7 +305,7 @@ export const Products: React.FC = () => {
                     value={newProductCategory}
                     onChange={(e) => setNewProductCategory(e.target.value)}
                     placeholder="e.g. Apparel"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-655"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-600"
                   />
                 </div>
               </div>
@@ -319,7 +319,7 @@ export const Products: React.FC = () => {
                   onChange={(e) => setNewProductDesc(e.target.value)}
                   placeholder="e.g. High-quality premium leather jackets with standard fits..."
                   rows={2}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-650 resize-none"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-600 resize-none"
                 />
               </div>
 
@@ -332,7 +332,7 @@ export const Products: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleAddVariantRow}
-                    className="text-[10px] font-bold text-indigo-455 hover:text-indigo-400 cursor-pointer flex items-center gap-1"
+                    className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer flex items-center gap-1"
                   >
                     + Add Variant
                   </button>
@@ -340,7 +340,7 @@ export const Products: React.FC = () => {
 
                 <div className="space-y-3 max-h-[180px] overflow-y-auto pr-1">
                   {variants.map((variant, index) => (
-                    <div key={index} className="flex gap-2.5 items-end bg-slate-900/20 p-2.5 rounded-xl border border-slate-850/60">
+                    <div key={index} className="flex gap-2.5 items-end bg-slate-900/20 p-2.5 rounded-xl border border-slate-800/60">
                       <div className="w-16">
                         <label className="text-[9px] uppercase font-bold text-slate-500 block mb-1">Size</label>
                         <input
@@ -392,7 +392,7 @@ export const Products: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleRemoveVariantRow(index)}
-                          className="text-slate-550 hover:text-rose-500 py-1 px-1 cursor-pointer"
+                          className="text-slate-500 hover:text-rose-500 py-1 px-1 cursor-pointer"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -405,11 +405,11 @@ export const Products: React.FC = () => {
               </div>
 
               {/* Submit Buttons */}
-              <div className="pt-4 border-t border-slate-850 flex justify-end gap-3.5">
+              <div className="pt-4 border-t border-slate-800 flex justify-end gap-3.5">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="bg-slate-900 hover:bg-slate-850 border border-slate-800 rounded-xl px-4 py-2 text-xs font-bold text-slate-400 hover:text-white cursor-pointer"
+                  className="bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl px-4 py-2 text-xs font-bold text-slate-400 hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>

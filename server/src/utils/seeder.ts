@@ -5,50 +5,61 @@ import Inventory from "../models/Inventory";
 
 export const seedDatabase = async () => {
   try {
-    // Check if Store already exists to prevent duplicate seeding
-    const storeCount = await Store.countDocuments();
-    if (storeCount > 0) {
-      console.log("Database already initialized. Skipping seeding.");
-      return;
+    console.log("Checking database default seed data...");
+
+    // 1. Resolve or Create default Store
+    let store = await Store.findOne({ name: "OmniPOS Flagship Store" });
+    if (!store) {
+      // Fallback: if any store exists, use the first one, otherwise create the flagship store
+      store = await Store.findOne({});
+      if (!store) {
+        store = await Store.create({
+          name: "OmniPOS Flagship Store",
+          location: "New York, NY",
+          isActive: true,
+        });
+        console.log(`Default store created: ${store.name}`);
+      } else {
+        console.log(`Using existing store: ${store.name}`);
+      }
+    } else {
+      console.log(`Found flagship store: ${store.name}`);
     }
 
-    console.log("Database is empty. Starting database seeding...");
-
-    // 1. Create a default Store
-    const store = await Store.create({
-      name: "PulseKart Flagship Store",
-      location: "New York, NY",
-      isActive: true,
-    });
-    console.log(`Default store created: ${store.name}`);
-
-    // 2. Create default Users
-    const users = await User.create([
+    // 2. Create default Users if they don't exist
+    const defaultUsers = [
       {
         name: "Admin User",
         email: "admin@example.com",
         password: "password123",
-        role: "admin",
+        role: "admin" as const,
         store: store._id,
       },
       {
         name: "Manager User",
         email: "manager@example.com",
         password: "password123",
-        role: "manager",
+        role: "manager" as const,
         store: store._id,
       },
       {
         name: "Cashier User",
         email: "cashier@example.com",
         password: "password123",
-        role: "cashier",
+        role: "cashier" as const,
         store: store._id,
       },
-    ]);
-    console.log(`Default users created: ${users.map((u) => u.email).join(", ")}`);
+    ];
 
-    // 3. Create default Products
+    for (const u of defaultUsers) {
+      const userExists = await User.findOne({ email: u.email });
+      if (!userExists) {
+        await User.create(u);
+        console.log(`Default user created: ${u.email}`);
+      }
+    }
+
+    // 3. Create default Products & Inventory if they don't exist
     const productsData = [
       {
         name: "Classic Denim Jacket",
@@ -85,23 +96,26 @@ export const seedDatabase = async () => {
     ];
 
     for (const productInfo of productsData) {
-      const product = await Product.create(productInfo);
-      console.log(`Product created: ${product.name}`);
+      const productExists = await Product.findOne({ name: productInfo.name });
+      if (!productExists) {
+        const product = await Product.create(productInfo);
+        console.log(`Product created: ${product.name}`);
 
-      // 4. Create matching Inventory records for each variant
-      for (const variant of product.variants) {
-        await Inventory.create({
-          product: product._id,
-          store: store._id,
-          sku: variant.sku,
-          quantity: variant.stock,
-          reorderPoint: 10,
-        });
-        console.log(`Inventory created for SKU: ${variant.sku}`);
+        // 4. Create matching Inventory records for each variant
+        for (const variant of product.variants) {
+          await Inventory.create({
+            product: product._id,
+            store: store._id,
+            sku: variant.sku,
+            quantity: variant.stock,
+            reorderPoint: 10,
+          });
+          console.log(`Inventory created for SKU: ${variant.sku}`);
+        }
       }
     }
 
-    console.log("Database seeded successfully!");
+    console.log("Database seed check and update complete.");
   } catch (error) {
     console.error("Error seeding database:", error);
   }

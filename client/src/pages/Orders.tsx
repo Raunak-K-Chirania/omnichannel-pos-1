@@ -81,7 +81,7 @@ export const Orders: React.FC = () => {
       </div>
 
       {error && (
-        <div className="bg-rose-950/80 border border-rose-500/25 text-rose-455 text-xs px-4 py-3 rounded-lg flex items-center gap-2">
+        <div className="bg-rose-950/80 border border-rose-500/25 text-rose-400 text-xs px-4 py-3 rounded-lg flex items-center gap-2">
           <svg className="w-5 h-5 text-rose-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
@@ -95,7 +95,7 @@ export const Orders: React.FC = () => {
           <span className="text-xs font-semibold text-slate-500">Querying historical ledger...</span>
         </div>
       ) : orders.length === 0 ? (
-        <div className="text-center py-20 text-slate-500 border border-dashed border-slate-850 rounded-xl bg-slate-900/10">
+        <div className="text-center py-20 text-slate-500 border border-dashed border-slate-800 rounded-xl bg-slate-900/10">
           No orders have been recorded at this store location yet.
         </div>
       ) : (

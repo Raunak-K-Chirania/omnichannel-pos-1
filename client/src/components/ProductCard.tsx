@@ -51,7 +51,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onAdd }) => {
                       ? 'bg-indigo-600 border-indigo-500 text-white shadow shadow-indigo-600/10'
                       : isOutOfStock
                       ? 'bg-slate-950/20 border-slate-900 text-slate-700 cursor-not-allowed'
-                      : 'bg-slate-900 border-slate-800/80 text-slate-400 hover:text-slate-200 hover:bg-slate-850'
+                      : 'bg-slate-900 border-slate-800/80 text-slate-400 hover:text-slate-200 hover:bg-slate-800'
                   }`}
                 >
                   {v.size} / {v.color}
@@ -62,7 +62,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onAdd }) => {
         </div>
       </div>
 
-      <div className="pt-2 border-t border-slate-850/60 flex items-center justify-between gap-2 mt-1">
+      <div className="pt-2 border-t border-slate-800/60 flex items-center justify-between gap-2 mt-1">
         <div className="flex flex-col">
           <span className="text-[8px] uppercase font-bold text-slate-500">Price</span>
           <span className="text-sm font-extrabold font-mono text-indigo-400">
@@ -93,7 +93,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onAdd }) => {
           onClick={handleAdd}
           className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase transition-all duration-200 cursor-pointer ${
             !selectedVariant || selectedVariant.stock <= 0
-              ? 'bg-slate-900 text-slate-500 border border-slate-850/30 cursor-not-allowed'
+              ? 'bg-slate-900 text-slate-500 border border-slate-800/30 cursor-not-allowed'
               : 'bg-indigo-600 hover:bg-indigo-500 text-white active:scale-95'
           }`}
         >

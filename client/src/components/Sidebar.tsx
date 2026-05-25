@@ -62,7 +62,7 @@ export const Sidebar: React.FC = () => {
   ];
 
   const filteredMenuItems = menuItems.filter(
-    (item) => user && item.roles.includes(user.role)
+    (item) => user && user.role && item.roles.includes(user.role)
   );
 
   return (
@@ -79,7 +79,7 @@ export const Sidebar: React.FC = () => {
               to={item.path}
               className={`flex items-center space-x-3 px-3 py-3 rounded-xl transition-all duration-200 group border-l-2 font-medium ${
                 isActive
-                  ? 'bg-gradient-to-r from-violet-650/15 to-indigo-650/15 text-indigo-400 border-indigo-500'
+                  ? 'bg-gradient-to-r from-violet-600/15 to-indigo-600/15 text-indigo-400 border-indigo-500'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 border-transparent'
               }`}
             >
@@ -96,13 +96,13 @@ export const Sidebar: React.FC = () => {
       
       {/* Footer Info or helper indicator */}
       {user && (
-        <div className="p-3 bg-slate-850/50 rounded-2xl border border-slate-800/60 flex items-center space-x-3">
+        <div className="p-3 bg-slate-800/50 rounded-2xl border border-slate-800/60 flex items-center space-x-3">
           <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-slate-300 border border-slate-700 shadow-sm text-sm uppercase">
-            {user.name.charAt(0)}
+            {user.name ? user.name.charAt(0) : '?'}
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-xs font-semibold text-slate-300 truncate">{user.name}</span>
-            <span className="text-[10px] text-slate-500 truncate capitalize">{user.role} Account</span>
+            <span className="text-xs font-semibold text-slate-300 truncate">{user.name || 'User'}</span>
+            <span className="text-[10px] text-slate-500 truncate capitalize">{(user.role || 'Guest')} Account</span>
           </div>
         </div>
       )}

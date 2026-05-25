@@ -10,14 +10,14 @@ export const useAuth = () => {
   const login = async (email: string, password: string) => {
     dispatch(setLoading(true));
     try {
-      const data = await authService.login(email, password);
-      dispatch(
-  setUser({
-    ...data.data,
-    token: data.token,
-  })
-);
-      return data;
+      const res = await authService.login(email, password);
+      // Transform response data to match the User interface structure
+      const formattedUser = {
+        ...res.data,
+        token: res.token,
+      };
+      dispatch(setUser(formattedUser));
+      return formattedUser;
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: { message?: string } } };
       const errMsg = axiosError.response?.data?.message || 'Login failed';
