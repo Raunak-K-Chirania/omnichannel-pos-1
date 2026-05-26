@@ -80,7 +80,7 @@ export const Login: React.FC = () => {
                 </svg>
               </div>
               <span className="text-2xl font-black bg-gradient-to-r from-violet-400 via-indigo-200 to-white bg-clip-text text-transparent tracking-tight">
-                OmniPOS
+                Omnichannel POS
               </span>
             </div>
 
@@ -130,7 +130,7 @@ export const Login: React.FC = () => {
           </div>
 
           <div className="text-[11px] text-slate-500 flex items-center space-x-1.5">
-            <span>© 2026 OmniPOS Systems. All rights reserved.</span>
+            <span>© 2026 Omnichannel POS Systems. All rights reserved.</span>
           </div>
         </div>
 
@@ -146,7 +146,7 @@ export const Login: React.FC = () => {
                 </svg>
               </div>
               <span className="text-xl font-extrabold bg-gradient-to-r from-violet-400 to-indigo-200 bg-clip-text text-transparent">
-                OmniPOS
+                Omnichannel POS
               </span>
             </div>
             

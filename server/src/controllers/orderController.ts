@@ -12,11 +12,7 @@ export const createOrder = async (
   req: AuthenticatedRequest,
   res: Response
 ): Promise<void> => {
-  const session = await mongoose.startSession();
-
   try {
-    session.startTransaction();
-
     const { items, store, paymentMethod } = req.body;
 
     if (!items || items.length === 0) {
@@ -29,7 +25,7 @@ export const createOrder = async (
 
     // STEP 1: PROCESS ITEMS
     for (const item of items) {
-      const product = await Product.findById(item.productId).session(session);
+      const product = await Product.findById(item.productId);
 
       if (!product) {
         throw new Error("Product not found");
@@ -49,7 +45,7 @@ export const createOrder = async (
 
       // reduce stock
       variant.stock -= item.quantity;
-      await product.save({ session });
+      await product.save();
 
       const lineTotal = variant.price * item.quantity;
       subtotal += lineTotal;
@@ -64,8 +60,7 @@ export const createOrder = async (
             unitPrice: variant.price,
             total: lineTotal,
           },
-        ],
-        { session }
+        ]
       );
 
       orderItemsIds.push(orderItem._id);
@@ -82,7 +77,7 @@ export const createOrder = async (
       [
         {
           store,
-          cashier: req.user?._id,
+          cashier: req.user?.id || req.user?._id,
           items: orderItemsIds,
           subtotal,
           tax,
@@ -91,13 +86,8 @@ export const createOrder = async (
           paymentMethod,
           status: "pending",
         },
-      ],
-      { session }
+      ]
     );
-
-    // STEP 4: COMMIT
-    await session.commitTransaction();
-    session.endSession();
 
     res.status(201).json({
       success: true,
@@ -107,10 +97,6 @@ export const createOrder = async (
     return;
 
   } catch (error: any) {
-    // STEP 5: ROLLBACK
-    await session.abortTransaction();
-    session.endSession();
-
     res.status(400).json({
       success: false,
       message: "Order creation failed",

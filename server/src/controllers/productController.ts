@@ -95,11 +95,13 @@ const getProducts = async (
       isActive: true,
     };
 
-    // Full text search
+    // Full text search fallback to regex
     if (search) {
-      query.$text = {
-        $search: search as string,
-      };
+      query.$or = [
+        { name: { $regex: search as string, $options: "i" } },
+        { category: { $regex: search as string, $options: "i" } },
+        { "variants.sku": { $regex: search as string, $options: "i" } }
+      ];
     }
 
     // Category filter

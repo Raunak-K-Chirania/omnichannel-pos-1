@@ -40,7 +40,7 @@ export const Navbar: React.FC = () => {
           </svg>
         </div>
         <span className="text-xl font-extrabold bg-gradient-to-r from-violet-400 via-indigo-200 to-white bg-clip-text text-transparent tracking-tight">
-          OmniPOS
+          Omnichannel POS
         </span>
       </div>
 

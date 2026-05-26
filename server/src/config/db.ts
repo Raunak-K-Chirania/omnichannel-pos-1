@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
+import dotenv from 'dotenv';
 import { seedDatabase } from "../utils/seeder";
+
+dotenv.config();
 
 const connectDB = async () => {
   try {
@@ -17,4 +20,4 @@ const connectDB = async () => {
   }
 };
 
-export default connectDB;
+export default connectDB;

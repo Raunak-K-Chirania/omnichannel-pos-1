@@ -5,104 +5,186 @@ import Inventory from "../models/Inventory";
 
 export const seedDatabase = async () => {
   try {
-    console.log("Checking database default seed data...");
+    console.log("Seeder started...");
 
-    // 1. Resolve or Create default Store
-    let store = await Store.findOne({ name: "OmniPOS Flagship Store" });
+    // =====================================================
+    // 1. FIND OR CREATE DEFAULT STORE
+    // =====================================================
+
+    let store = await Store.findOne({
+      name: "Omnichannel POS Flagship Store",
+    });
+
     if (!store) {
-      // Fallback: if any store exists, use the first one, otherwise create the flagship store
+      // If any store exists, use it and update its name
       store = await Store.findOne({});
-      if (!store) {
+
+      if (store) {
+        store.name = "Omnichannel POS Flagship Store";
+        await store.save();
+        console.log(`Updated existing store name to: ${store.name}`);
+      } else {
+        // Otherwise create default flagship store
         store = await Store.create({
-          name: "OmniPOS Flagship Store",
+          name: "Omnichannel POS Flagship Store",
           location: "New York, NY",
           isActive: true,
         });
+
         console.log(`Default store created: ${store.name}`);
-      } else {
-        console.log(`Using existing store: ${store.name}`);
       }
     } else {
       console.log(`Found flagship store: ${store.name}`);
     }
 
-    // 2. Create default Users if they don't exist
+    // =====================================================
+    // 2. CREATE DEFAULT USERS
+    // =====================================================
+
     const defaultUsers = [
       {
         name: "Admin User",
         email: "admin@example.com",
-        password: "password123",
+        password:
+          process.env.DEFAULT_PASSWORD || "password123",
         role: "admin" as const,
         store: store._id,
       },
       {
         name: "Manager User",
         email: "manager@example.com",
-        password: "password123",
+        password:
+          process.env.DEFAULT_PASSWORD || "password123",
         role: "manager" as const,
         store: store._id,
       },
       {
         name: "Cashier User",
         email: "cashier@example.com",
-        password: "password123",
+        password:
+          process.env.DEFAULT_PASSWORD || "password123",
         role: "cashier" as const,
         store: store._id,
       },
     ];
 
-    for (const u of defaultUsers) {
-      const userExists = await User.findOne({ email: u.email });
-      if (!userExists) {
-        await User.create(u);
-        console.log(`Default user created: ${u.email}`);
+    for (const userData of defaultUsers) {
+      const existingUser = await User.findOne({
+        email: userData.email,
+      });
+
+      if (!existingUser) {
+        await User.create(userData);
+
+        console.log(
+          `Default user created: ${userData.email}`
+        );
+      } else {
+        console.log(
+          `User already exists: ${userData.email}`
+        );
       }
     }
 
-    // 3. Create default Products & Inventory if they don't exist
+    // =====================================================
+    // 3. CREATE DEFAULT PRODUCTS
+    // =====================================================
+
     const productsData = [
       {
         name: "Classic Denim Jacket",
         category: "Apparel",
-        description: "Timeless classic denim jacket with premium wash.",
+        description:
+          "Timeless classic denim jacket with premium wash.",
         store: store._id,
         isActive: true,
         variants: [
-          { size: "M", color: "Blue", sku: "APP-DEN-JAC-M-BLU", price: 79.99, stock: 25 },
-          { size: "L", color: "Blue", sku: "APP-DEN-JAC-L-BLU", price: 79.99, stock: 15 },
+          {
+            size: "M",
+            color: "Blue",
+            sku: "APP-DEN-JAC-M-BLU",
+            price: 79.99,
+            stock: 25,
+          },
+          {
+            size: "L",
+            color: "Blue",
+            sku: "APP-DEN-JAC-L-BLU",
+            price: 79.99,
+            stock: 15,
+          },
         ],
       },
       {
         name: "Wireless ANC Headphones",
         category: "Electronics",
-        description: "High-fidelity sound with active noise cancellation.",
+        description:
+          "High-fidelity sound with active noise cancellation.",
         store: store._id,
         isActive: true,
         variants: [
-          { size: "One Size", color: "Black", sku: "ELE-WIR-HP-OS-BLK", price: 149.99, stock: 30 },
-          { size: "One Size", color: "White", sku: "ELE-WIR-HP-OS-WHT", price: 149.99, stock: 10 },
+          {
+            size: "One Size",
+            color: "Black",
+            sku: "ELE-WIR-HP-OS-BLK",
+            price: 149.99,
+            stock: 30,
+          },
+          {
+            size: "One Size",
+            color: "White",
+            sku: "ELE-WIR-HP-OS-WHT",
+            price: 149.99,
+            stock: 10,
+          },
         ],
       },
       {
         name: "Leather Minimalist Wallet",
         category: "Accessories",
-        description: "Genuine leather slim wallet with RFID blocking.",
+        description:
+          "Genuine leather slim wallet with RFID blocking.",
         store: store._id,
         isActive: true,
         variants: [
-          { size: "One Size", color: "Brown", sku: "ACC-LTH-WAL-OS-BRN", price: 34.99, stock: 50 },
+          {
+            size: "One Size",
+            color: "Brown",
+            sku: "ACC-LTH-WAL-OS-BRN",
+            price: 34.99,
+            stock: 50,
+          },
         ],
       },
     ];
 
-    for (const productInfo of productsData) {
-      const productExists = await Product.findOne({ name: productInfo.name });
-      if (!productExists) {
-        const product = await Product.create(productInfo);
-        console.log(`Product created: ${product.name}`);
+    for (const productData of productsData) {
+      let product = await Product.findOne({
+        name: productData.name,
+      });
 
-        // 4. Create matching Inventory records for each variant
-        for (const variant of product.variants) {
+      // Create product if not exists
+      if (!product) {
+        product = await Product.create(productData);
+
+        console.log(`Product created: ${product.name}`);
+      } else {
+        console.log(
+          `Product already exists: ${product.name}`
+        );
+      }
+
+      // =====================================================
+      // 4. CREATE INVENTORY FOR EACH VARIANT
+      // =====================================================
+
+      for (const variant of product.variants) {
+        const existingInventory =
+          await Inventory.findOne({
+            sku: variant.sku,
+          });
+
+        if (!existingInventory) {
           await Inventory.create({
             product: product._id,
             store: store._id,
@@ -110,12 +192,34 @@ export const seedDatabase = async () => {
             quantity: variant.stock,
             reorderPoint: 10,
           });
-          console.log(`Inventory created for SKU: ${variant.sku}`);
+
+          console.log(
+            `Inventory created for SKU: ${variant.sku}`
+          );
+        } else {
+          console.log(
+            `Inventory already exists for SKU: ${variant.sku}`
+          );
         }
       }
     }
 
-    console.log("Database seed check and update complete.");
+    // =====================================================
+    // 5. FINAL DATABASE STATS
+    // =====================================================
+
+    const totalStores = await Store.countDocuments();
+    const totalUsers = await User.countDocuments();
+    const totalProducts = await Product.countDocuments();
+    const totalInventory = await Inventory.countDocuments();
+
+    console.log("=================================");
+    console.log("Database seeding complete");
+    console.log(`Stores: ${totalStores}`);
+    console.log(`Users: ${totalUsers}`);
+    console.log(`Products: ${totalProducts}`);
+    console.log(`Inventory Records: ${totalInventory}`);
+    console.log("=================================");
   } catch (error) {
     console.error("Error seeding database:", error);
   }
