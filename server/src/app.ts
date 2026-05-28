@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
+import path from "path";
 import "express-async-errors";
 
 import authRoutes from "./routes/authRoutes";
@@ -23,6 +24,9 @@ app.use(cors());
 app.use(express.json());
 
 app.use(morgan("dev"));
+
+// Static files directory for product image uploads
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 
 // Health Check Route

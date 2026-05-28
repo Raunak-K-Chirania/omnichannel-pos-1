@@ -16,6 +16,7 @@ export interface IProduct extends Document {
     store: mongoose.Types.ObjectId;
     isActive: boolean;
     stock: number;
+    image?: string;
 }
 const VariantSchema: Schema<IVariant> = new Schema({
     size: {
@@ -65,6 +66,10 @@ const ProductSchema:Schema<IProduct> = new Schema({
     isActive:{
         type: Boolean,
         default: true,
+    },
+    image:{
+        type: String,
+        default: "",
     },
 },{timestamps: true});
 //text index for search

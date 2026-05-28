@@ -16,6 +16,7 @@ export interface Product {
   store?: string;
   createdAt?: string;
   updatedAt?: string;
+  image?: string;
 }
 
 export interface CartItem {
@@ -25,6 +26,7 @@ export interface CartItem {
   unitPrice: number;
   quantity: number;
   discount: number; // percentage (e.g. 10 for 10% discount)
+  image?: string;
 }
 
 export interface InventoryItem {
