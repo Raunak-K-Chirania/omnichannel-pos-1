@@ -28,8 +28,8 @@ export const Orders: React.FC = () => {
     setError(null);
     try {
       const data = await orderService.getAll();
-      console.log('Fetched orders data:', data.data); // Debugging line to check orders data
-      setOrders(data.data);
+      console.log('Fetched orders data:', data); // Debugging line to check orders data
+      setOrders(data);
     } catch (err: unknown) {
       console.error(err);
       const axiosError = err as { response?: { data?: { message?: string } } };

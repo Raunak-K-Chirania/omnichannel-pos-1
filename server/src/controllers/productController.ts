@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import Product from "../models/Product";
+import Inventory from "../models/Inventory";
 import redisClient from "../config/redis";
 
 const CACHE_PREFIX = "products:";
@@ -12,10 +13,14 @@ const CACHE_TTL = 300; // 5 minutes
 // -----------------------------------------
 
 const clearProductCache = async () => {
-  const keys = await redisClient.keys(`${CACHE_PREFIX}*`);
+  try {
+    const keys = await redisClient.keys(`${CACHE_PREFIX}*`);
 
-  if (keys.length > 0) {
-    await redisClient.del(keys);
+    if (keys.length > 0) {
+      await redisClient.del(keys);
+    }
+  } catch (err) {
+    console.error("Redis cache clearing failed:", err);
   }
 };
 
@@ -33,6 +38,19 @@ const createProduct = async (
   try {
 
     const product = await Product.create(req.body);
+
+    // Initialize inventory record for each variant
+    if (product.variants && product.variants.length > 0) {
+      for (const variant of product.variants) {
+        await Inventory.create({
+          product: product._id,
+          store: product.store,
+          sku: variant.sku,
+          quantity: variant.stock || 0,
+          reorderPoint: 10,
+        });
+      }
+    }
 
     // Clear cache after create
     await clearProductCache();
@@ -81,8 +99,12 @@ const getProducts = async (
       `${CACHE_PREFIX}${JSON.stringify(req.query)}`;
 
     // Check Redis cache
-    const cachedData =
-      await redisClient.get(cacheKey);
+    let cachedData = null;
+    try {
+      cachedData = await redisClient.get(cacheKey);
+    } catch (err) {
+      console.error("Redis get cache failed:", err);
+    }
 
     // Cache hit
     if (cachedData) {
@@ -138,11 +160,15 @@ const getProducts = async (
     };
 
     // Store in Redis
-    await redisClient.setex(
-      cacheKey,
-      CACHE_TTL,
-      JSON.stringify(result)
-    );
+    try {
+      await redisClient.setex(
+        cacheKey,
+        CACHE_TTL,
+        JSON.stringify(result)
+      );
+    } catch (err) {
+      console.error("Redis set cache failed:", err);
+    }
 
     res.json(result);
 

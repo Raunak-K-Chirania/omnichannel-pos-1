@@ -35,9 +35,9 @@ export const POS: React.FC = () => {
       setLoadingProducts(true);
       try {
         const data = await productService.getAll({ search: searchTerm });
-        console.log('Fetched products data:', data.products); // Debugging line to check products data
+        console.log('Fetched products data:', data); // Debugging line to check products data
         // Filter out inactive products
-        setProducts(data.products.filter((p: Product) => p.isActive));
+        setProducts(data.filter((p: Product) => p.isActive));
       } catch (err) {
         console.error('Error fetching products', err);
       } finally {
@@ -65,6 +65,7 @@ export const POS: React.FC = () => {
       unitPrice: variant.price,
       quantity: 1,
       discount: 0, // default no discount
+      image: product.image,
     };
     addItem(cartItem);
   }, [addItem]);
@@ -288,13 +289,28 @@ export const POS: React.FC = () => {
                     className="p-3 bg-slate-900/60 border border-slate-800/80 rounded-xl flex flex-col justify-between gap-2.5 hover:border-slate-800/80 transition-colors"
                   >
                     <div className="flex justify-between items-start gap-3">
-                      <div>
-                        <h4 className="text-xs font-bold text-slate-200 line-clamp-1">{item.name}</h4>
-                        <div className="text-[10px] text-slate-500 font-mono mt-0.5">SKU: {item.sku}</div>
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        {item.image ? (
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className="w-10 h-10 object-cover rounded-lg border border-slate-800 bg-slate-950 flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-lg border border-slate-800 bg-slate-950/80 flex items-center justify-center text-slate-600 flex-shrink-0">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <h4 className="text-xs font-bold text-slate-200 truncate">{item.name}</h4>
+                          <div className="text-[10px] text-slate-500 font-mono mt-0.5">SKU: {item.sku}</div>
+                        </div>
                       </div>
                       <button
                         onClick={() => removeItem(item.sku)}
-                        className="text-slate-500 hover:text-rose-500 cursor-pointer"
+                        className="text-slate-500 hover:text-rose-500 cursor-pointer flex-shrink-0 mt-0.5"
                         title="Remove Item"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

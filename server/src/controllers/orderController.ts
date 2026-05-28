@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import Product from "../models/Product";
 import Order from "../models/Order";
 import OrderItem from "../models/OrderItem";
+import Inventory from "../models/Inventory";
 import { AuthenticatedRequest } from "../middleware/authMiddleware";
 
 // -----------------------------------------
@@ -25,39 +26,59 @@ export const createOrder = async (
 
     // STEP 1: PROCESS ITEMS
     for (const item of items) {
-      const product = await Product.findById(item.productId);
+      // Atomic check and decrement for product stock
+      const updatedProduct = await Product.findOneAndUpdate(
+        {
+          _id: item.productId,
+          "variants.sku": item.sku,
+          "variants.stock": { $gte: item.quantity },
+        },
+        {
+          $inc: { "variants.$.stock": -item.quantity },
+        },
+        { new: true }
+      );
 
-      if (!product) {
-        throw new Error("Product not found");
+      if (!updatedProduct) {
+        throw new Error(`Insufficient stock for SKU ${item.sku}`);
       }
 
-      const variant = product.variants.find(
+      // Find the updated variant to get the correct price
+      const updatedVariant = updatedProduct.variants.find(
         (v) => v.sku === item.sku
       );
 
-      if (!variant) {
-        throw new Error("Variant not found");
+      if (!updatedVariant) {
+        throw new Error("Variant not found after update");
       }
 
-      if (variant.stock < item.quantity) {
-        throw new Error(`Insufficient stock for SKU ${variant.sku}`);
+      // reduce inventory stock atomically as well, checking if there is sufficient stock
+      const updatedInventory = await Inventory.findOneAndUpdate(
+        { sku: item.sku, store: store, quantity: { $gte: item.quantity } },
+        { $inc: { quantity: -item.quantity } },
+        { new: true }
+      );
+
+      if (!updatedInventory) {
+        // Rollback product stock update if inventory update fails
+        await Product.findOneAndUpdate(
+          { _id: item.productId, "variants.sku": item.sku },
+          { $inc: { "variants.$.stock": item.quantity } }
+        );
+        throw new Error(`Insufficient stock in store inventory for SKU ${item.sku}`);
       }
 
-      // reduce stock
-      variant.stock -= item.quantity;
-      await product.save();
-
-      const lineTotal = variant.price * item.quantity;
+      const lineTotal = updatedVariant.price * item.quantity;
       subtotal += lineTotal;
 
       const [orderItem] = await OrderItem.create(
         [
           {
-            product: product._id,
-            sku: variant.sku,
-            name: product.name,
+            product: updatedProduct._id,
+            sku: updatedVariant.sku,
+            name: updatedProduct.name,
             quantity: item.quantity,
-            unitPrice: variant.price,
+            unitPrice: updatedVariant.price,
             total: lineTotal,
           },
         ]
