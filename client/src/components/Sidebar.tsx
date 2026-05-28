@@ -4,6 +4,8 @@ import useAuth from '../hooks/useAuth';
 
 export const Sidebar: React.FC = () => {
   const { user } = useAuth();
+  //console.log('Current user in Sidebar:', user);
+ // Debugging line to check user state
   const location = useLocation();
 
   const menuItems = [

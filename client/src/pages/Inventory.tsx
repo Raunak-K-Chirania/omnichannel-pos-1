@@ -21,6 +21,7 @@ export const Inventory: React.FC = () => {
     setError(null);
     try {
       const data = await inventoryService.getAll();
+      //console.log('Fetched inventory data:', data); // Debugging line to check inventory data
       setInventory(data);
     } catch (err: unknown) {
       console.error(err);

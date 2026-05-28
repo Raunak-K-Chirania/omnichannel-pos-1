@@ -42,7 +42,8 @@ export const Dashboard: React.FC = () => {
 
         // Fetch recent orders
         const ordersData = await orderService.getAll();
-        setRecentOrders(ordersData);
+        //console.log('Fetched orders data:', ordersData); // Debugging line to check orders data
+        setRecentOrders(ordersData || []);
       } catch (err: unknown) {
         console.error('Error loading dashboard data', err);
         const axiosError = err as { response?: { data?: { message?: string } } };

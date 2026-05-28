@@ -10,9 +10,9 @@ const router = Router();
 // -----------------------------------------
 // TEST ROUTE
 // -----------------------------------------
-router.get("/", (req, res) => {
+/*router.get("/", (req, res) => {
   res.send("Order routes working");
-});
+});*/
 
 // -----------------------------------------
 // ALL ROUTES BELOW REQUIRE LOGIN

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import useAuth from '../hooks/useAuth';
 import productService from '../services/productService';
+import api from '../services/api';
 import type { Product, Variant } from '../types/product.types';
 
 export const Products: React.FC = () => {
@@ -10,11 +11,14 @@ export const Products: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   
-  // Create Product Modal State
+  // Create / Edit Product Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [newProductName, setNewProductName] = useState('');
   const [newProductCategory, setNewProductCategory] = useState('');
   const [newProductDesc, setNewProductDesc] = useState('');
+  const [imagePath, setImagePath] = useState<string>('');
+  const [imageUploading, setImageUploading] = useState<boolean>(false);
   const [variants, setVariants] = useState<Array<Omit<Variant, 'sku'> & { sku?: string }>>([
     { size: 'M', color: 'Black', price: 29.99, stock: 50 }
   ]);
@@ -27,7 +31,8 @@ export const Products: React.FC = () => {
     setError(null);
     try {
       const data = await productService.getAll({ search });
-      setProducts(data);
+     // console.log('Fetched products data:', data); // Debugging line to check products data
+      setProducts(data || []);
     } catch (err: unknown) {
       console.error(err);
       const axiosError = err as { response?: { data?: { message?: string } } };
@@ -64,6 +69,70 @@ export const Products: React.FC = () => {
     setVariants(updated);
   };
 
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingProduct(null);
+    setNewProductName('');
+    setNewProductCategory('');
+    setNewProductDesc('');
+    setImagePath('');
+    setVariants([{ size: 'M', color: 'Black', price: 29.99, stock: 50 }]);
+    setModalError(null);
+  };
+
+  const handleEditClick = (product: Product) => {
+    setEditingProduct(product);
+    setNewProductName(product.name);
+    setNewProductCategory(product.category);
+    setNewProductDesc(product.description || '');
+    setVariants(product.variants);
+    setImagePath(product.image || '');
+    setModalError(null);
+    setIsModalOpen(true);
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setModalError('Only image files of type JPG, JPEG, PNG, or WEBP are allowed.');
+      return;
+    }
+
+    // Validate size (5MB = 5 * 1024 * 1024 bytes)
+    if (file.size > 5 * 1024 * 1024) {
+      setModalError('Maximum image size is 5MB.');
+      return;
+    }
+
+    setModalError(null);
+    setImageUploading(true);
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const response = await api.post('/products/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (response.data && response.data.url) {
+        setImagePath(response.data.url);
+      }
+    } catch (err: any) {
+      console.error('Image upload failed', err);
+      const axiosError = err as { response?: { data?: { message?: string } } };
+      setModalError(axiosError.response?.data?.message || 'Failed to upload product image.');
+    } finally {
+      setImageUploading(false);
+    }
+  };
+
   const handleCreateProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newProductName || !newProductCategory) return;
@@ -95,21 +164,24 @@ export const Products: React.FC = () => {
       variants: formattedVariants,
       isActive: true,
       store: user?.store,
+      image: imagePath,
     };
 
     try {
-      await productService.create(productPayload);
-      setIsModalOpen(false);
-      // Reset form
-      setNewProductName('');
-      setNewProductCategory('');
-      setNewProductDesc('');
-      setVariants([{ size: 'M', color: 'Black', price: 29.99, stock: 50 }]);
+      if (editingProduct) {
+        await productService.update(editingProduct._id, productPayload);
+      } else {
+        await productService.create(productPayload);
+      }
+      handleCloseModal();
       fetchProducts(searchTerm);
     } catch (err: unknown) {
       console.error(err);
       const axiosError = err as { response?: { data?: { message?: string } } };
-      setModalError(axiosError.response?.data?.message || 'Failed to create new product. Check your fields.');
+      setModalError(
+        axiosError.response?.data?.message ||
+          `Failed to ${editingProduct ? 'update' : 'create'} product. Check your fields.`
+      );
     } finally {
       setSubmitPending(false);
     }
@@ -128,7 +200,10 @@ export const Products: React.FC = () => {
 
         {isAuthorized && (
           <button
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => {
+              handleCloseModal();
+              setIsModalOpen(true);
+            }}
             className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all duration-200 cursor-pointer shadow shadow-indigo-600/10 active:scale-95"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -198,9 +273,26 @@ export const Products: React.FC = () => {
                   return (
                     <tr key={product._id} className="hover:bg-slate-800/15 transition-colors">
                       <td className="p-4">
-                        <div className="font-extrabold text-slate-200">{product.name}</div>
-                        <div className="text-[10px] text-slate-500 mt-0.5 line-clamp-1 max-w-[280px]">
-                          {product.description || 'No description provided.'}
+                        <div className="flex items-center gap-3">
+                          {product.image ? (
+                            <img
+                              src={product.image}
+                              alt={product.name}
+                              className="w-10 h-10 object-cover rounded-lg border border-slate-800 bg-slate-950 flex-shrink-0"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-lg border border-slate-800 bg-slate-950/80 flex items-center justify-center text-slate-600 flex-shrink-0">
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                            </div>
+                          )}
+                          <div>
+                            <div className="font-extrabold text-slate-200">{product.name}</div>
+                            <div className="text-[10px] text-slate-500 mt-0.5 line-clamp-1 max-w-[200px]">
+                              {product.description || 'No description provided.'}
+                            </div>
+                          </div>
                         </div>
                       </td>
                       <td className="p-4">
@@ -232,15 +324,25 @@ export const Products: React.FC = () => {
                           : `$${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)}`}
                       </td>
                       <td className="p-4 text-right">
-                        <span
-                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                            product.isActive
-                              ? 'bg-emerald-950/80 border border-emerald-500/20 text-emerald-400'
-                              : 'bg-slate-950/80 border border-slate-700/20 text-slate-500'
-                          }`}
-                        >
-                          {product.isActive ? 'Active' : 'Archived'}
-                        </span>
+                        <div className="flex items-center justify-end gap-3.5">
+                          <span
+                            className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                              product.isActive
+                                ? 'bg-emerald-950/80 border border-emerald-500/20 text-emerald-400'
+                                : 'bg-slate-950/80 border border-slate-700/20 text-slate-500'
+                            }`}
+                          >
+                            {product.isActive ? 'Active' : 'Archived'}
+                          </span>
+                          {isAuthorized && (
+                            <button
+                              onClick={() => handleEditClick(product)}
+                              className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 px-2.5 py-1 border border-slate-800 hover:border-slate-700 bg-slate-900/50 rounded-lg cursor-pointer transition-all"
+                            >
+                              Edit
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -257,9 +359,11 @@ export const Products: React.FC = () => {
           <div className="glass-panel border border-slate-800 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl animate-scaleUp">
             {/* Modal Header */}
             <div className="p-5 border-b border-slate-800 flex justify-between items-center bg-slate-900/40">
-              <h2 className="text-base font-extrabold text-white tracking-wide">Catalog Creator Terminal</h2>
+              <h2 className="text-base font-extrabold text-white tracking-wide">
+                {editingProduct ? 'Catalog Item Editor' : 'Catalog Creator Terminal'}
+              </h2>
               <button
-                onClick={() => setIsModalOpen(false)}
+                onClick={handleCloseModal}
                 className="text-slate-500 hover:text-slate-300 cursor-pointer"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -320,6 +424,57 @@ export const Products: React.FC = () => {
                   rows={2}
                   className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-600 resize-none"
                 />
+              </div>
+
+              {/* Product Image Section */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-1.5">
+                    Product Image (Optional)
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept="image/png, image/jpeg, image/jpg, image/webp"
+                      onChange={handleImageChange}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-400 focus:outline-none focus:border-indigo-600 file:mr-4 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-indigo-600/10 file:text-indigo-400 hover:file:bg-indigo-600/20 file:cursor-pointer"
+                    />
+                    {imageUploading && (
+                      <div className="absolute right-3 top-2.5 flex items-center gap-1.5">
+                        <div className="w-3.5 h-3.5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                        <span className="text-[9px] text-slate-500 font-bold">Uploading...</span>
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-[9px] text-slate-500 mt-1">Supports JPG, JPEG, PNG, WEBP (Max 5MB)</p>
+                </div>
+
+                <div className="flex flex-col items-center justify-center bg-slate-950/40 border border-slate-800 rounded-xl p-3 h-24">
+                  <span className="text-[9px] uppercase font-bold tracking-wider text-slate-500 mb-1.5 block">Image Preview</span>
+                  {imagePath ? (
+                    <div className="relative group w-16 h-16 rounded-lg overflow-hidden border border-slate-800">
+                      <img
+                        src={imagePath}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setImagePath('')}
+                        className="absolute inset-0 bg-rose-950/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] font-bold text-rose-400 transition-opacity duration-200 cursor-pointer"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="text-slate-600 flex flex-col items-center">
+                      <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span className="text-[9px] font-medium">No Image Uploaded</span>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Dynamic Variants section */}
@@ -407,7 +562,7 @@ export const Products: React.FC = () => {
               <div className="pt-4 border-t border-slate-800 flex justify-end gap-3.5">
                 <button
                   type="button"
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={handleCloseModal}
                   className="bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl px-4 py-2 text-xs font-bold text-slate-400 hover:text-white cursor-pointer"
                 >
                   Cancel
@@ -420,10 +575,10 @@ export const Products: React.FC = () => {
                   {submitPending ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>Creating...</span>
+                      <span>{editingProduct ? 'Saving...' : 'Creating...'}</span>
                     </>
                   ) : (
-                    <span>Create Catalog Item</span>
+                    <span>{editingProduct ? 'Save Changes' : 'Create Catalog Item'}</span>
                   )}
                 </button>
               </div>
