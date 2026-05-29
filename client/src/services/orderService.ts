@@ -6,7 +6,9 @@ const isDemoMode = () => {
     try {
       const user = JSON.parse(userString);
       return user && user.token === 'mock-jwt-token-bypass-mode';
-    } catch {}
+    } catch {
+      // ignore json parsing errors
+    }
   }
   return false;
 };
@@ -33,7 +35,7 @@ export const orderService = {
         cashier: { name: "Demo Cashier" },
         items: data.items,
         paymentMethod: data.paymentMethod,
-        total: data.items.reduce((sum: number, item: any) => sum + (item.unitPrice * item.quantity), 0) * 1.18,
+        total: data.items.reduce((sum: number, item) => sum + (item.unitPrice * item.quantity), 0) * 1.18,
         status: "Completed",
       };
       demoOrders.unshift(newOrder);

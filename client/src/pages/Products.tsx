@@ -124,7 +124,7 @@ export const Products: React.FC = () => {
       if (response.data && response.data.url) {
         setImagePath(response.data.url);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Image upload failed', err);
       const axiosError = err as { response?: { data?: { message?: string } } };
       setModalError(axiosError.response?.data?.message || 'Failed to upload product image.');

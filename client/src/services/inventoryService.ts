@@ -6,7 +6,9 @@ const isDemoMode = () => {
     try {
       const user = JSON.parse(userString);
       return user && user.token === 'mock-jwt-token-bypass-mode';
-    } catch {}
+    } catch {
+      // ignore json parsing errors
+    }
   }
   return false;
 };

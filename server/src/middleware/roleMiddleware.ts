@@ -3,7 +3,7 @@
   - Returns 403 if the role is not authorized
   - Calls next() if authorized */
   import { AuthenticatedRequest } from './authMiddleware';
-  import { Request, Response, NextFunction } from 'express';
+  import { Response, NextFunction } from 'express';
   import { UserRole } from '../models/User';
 const roleMiddleware = (...allowedRoles: UserRole[]) => {
     return (
