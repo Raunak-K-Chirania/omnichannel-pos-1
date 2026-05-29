@@ -45,6 +45,48 @@ const getDemoProducts = () => {
   return initial;
 };
 
+const isDemoMode = () => {
+  const userString = localStorage.getItem('user');
+  if (userString) {
+    try {
+      const user = JSON.parse(userString);
+      return user && user.token === 'mock-jwt-token-bypass-mode';
+    } catch {}
+  }
+  return false;
+};
+
+const getDemoProducts = () => {
+  const stored = localStorage.getItem('demo_products');
+  if (stored) return JSON.parse(stored);
+
+  const initial = [
+    {
+      _id: "mock-prod-1",
+      name: "Classic Denim Jacket (Demo)",
+      category: "Apparel",
+      description: "Timeless classic denim jacket with premium wash.",
+      isActive: true,
+      variants: [
+        { size: "M", color: "Blue", sku: "MOCK-APP-DEN-JAC-M-BLU", price: 79.99, stock: 25 },
+        { size: "L", color: "Blue", sku: "MOCK-APP-DEN-JAC-L-BLU", price: 79.99, stock: 15 },
+      ],
+    },
+    {
+      _id: "mock-prod-2",
+      name: "Wireless ANC Headphones (Demo)",
+      category: "Electronics",
+      description: "High-fidelity sound with active noise cancellation.",
+      isActive: true,
+      variants: [
+        { size: "One Size", color: "Black", sku: "MOCK-ELE-WIR-HP-OS-BLK", price: 149.99, stock: 30 },
+      ],
+    },
+  ];
+  localStorage.setItem('demo_products', JSON.stringify(initial));
+  return initial;
+};
+
 export const productService = {
   async getAll(params?: { search?: string; category?: string; store?: string }) {
     if (isDemoMode()) {
