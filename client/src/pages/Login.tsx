@@ -21,11 +21,6 @@ export const Login: React.FC = () => {
     }
   }, [user, navigate]);
 
-  const handleRoleSelect = (role: 'admin' | 'manager' | 'cashier') => {
-    setSelectedRole(role);
-    setEmail(`${role}@example.com`);
-    setPassword('password123');
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,191 +130,121 @@ export const Login: React.FC = () => {
         </div>
 
         {/* Right Panel: Active Form & Credentials Picker */}
-        <div className="lg:col-span-7 p-8 md:p-12 flex flex-col justify-between bg-slate-900/40">
+        <div className="lg:col-span-7 p-8 md:p-12 flex flex-col justify-center bg-slate-900/40 relative">
           
-          {/* Title & Welcome */}
-          <div className="mb-6">
-            <div className="flex items-center space-x-2.5 lg:hidden mb-6">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-violet-600 to-indigo-500 flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <span className="text-xl font-extrabold bg-gradient-to-r from-violet-400 to-indigo-200 bg-clip-text text-transparent">
-                Omnichannel POS
-              </span>
-            </div>
-            
-            <h2 className="text-2xl font-extrabold text-white tracking-tight">Access Terminal</h2>
-            <p className="text-slate-400 text-xs mt-1">Select a role for quick-fill credentials, or enter account details manually.</p>
-          </div>
-
-          {/* Role Quick Selector Cards */}
-          <div className="grid grid-cols-3 gap-3.5 mb-6">
-            {/* Cashier Option */}
-            <button
-              type="button"
-              onClick={() => handleRoleSelect('cashier')}
-              className={`p-3.5 rounded-xl border text-left flex flex-col justify-between transition-all duration-200 cursor-pointer ${
-                selectedRole === 'cashier'
-                  ? 'bg-emerald-500/10 border-emerald-500/80 shadow-md shadow-emerald-500/5'
-                  : 'bg-slate-900/60 border-slate-800 hover:border-slate-700/60 hover:bg-slate-900/80'
-              }`}
-            >
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-3 ${
-                selectedRole === 'cashier' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-800 text-slate-400'
-              }`}>
-                <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                </svg>
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-slate-200">Cashier</h4>
-                <p className="text-[10px] text-slate-500 mt-0.5">Standard terminal access</p>
-              </div>
-            </button>
-
-            {/* Manager Option */}
-            <button
-              type="button"
-              onClick={() => handleRoleSelect('manager')}
-              className={`p-3.5 rounded-xl border text-left flex flex-col justify-between transition-all duration-200 cursor-pointer ${
-                selectedRole === 'manager'
-                  ? 'bg-purple-500/10 border-purple-500/80 shadow-md shadow-purple-500/5'
-                  : 'bg-slate-900/60 border-slate-800 hover:border-slate-700/60 hover:bg-slate-900/80'
-              }`}
-            >
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-3 ${
-                selectedRole === 'manager' ? 'bg-purple-500/20 text-purple-400' : 'bg-slate-800 text-slate-400'
-              }`}>
-                <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-slate-200">Manager</h4>
-                <p className="text-[10px] text-slate-500 mt-0.5">Inventory/Shift access</p>
-              </div>
-            </button>
-
-            {/* Admin Option */}
-            <button
-              type="button"
-              onClick={() => handleRoleSelect('admin')}
-              className={`p-3.5 rounded-xl border text-left flex flex-col justify-between transition-all duration-200 cursor-pointer ${
-                selectedRole === 'admin'
-                  ? 'bg-rose-500/10 border-rose-500/80 shadow-md shadow-rose-500/5'
-                  : 'bg-slate-900/60 border-slate-800 hover:border-slate-700/60 hover:bg-slate-900/80'
-              }`}
-            >
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-3 ${
-                selectedRole === 'admin' ? 'bg-rose-500/20 text-rose-400' : 'bg-slate-800 text-slate-400'
-              }`}>
-                <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-slate-200">Admin</h4>
-                <p className="text-[10px] text-slate-500 mt-0.5">Full corporate access</p>
-              </div>
-            </button>
-          </div>
-
-          {/* Error Alert Box */}
-          {error && (
-            <div className="bg-rose-950/20 border border-rose-500/25 text-rose-400 text-xs px-4 py-3 rounded-xl mb-5 flex items-start gap-2.5">
-              <svg className="w-4.5 h-4.5 mt-0.5 flex-shrink-0 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <div>
-                <span className="font-bold">Connection/Authentication Error:</span> {error}
-              </div>
-            </div>
-          )}
-
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="max-w-md w-full mx-auto space-y-6">
+            {/* Title & Welcome */}
             <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1.5">
-                Email Address
-              </label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206" />
+              <div className="flex items-center space-x-2.5 lg:hidden mb-6">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-violet-600 to-indigo-500 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                   </svg>
+                </div>
+                <span className="text-xl font-extrabold bg-gradient-to-r from-violet-400 to-indigo-200 bg-clip-text text-transparent">
+                  Omnichannel POS
                 </span>
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    setSelectedRole(null);
-                  }}
-                  placeholder="cashier@example.com"
-                  className="w-full bg-slate-950/60 border border-slate-800 rounded-xl py-3 pl-10 pr-4 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/40 transition-all duration-200"
-                />
               </div>
+              
+              <h2 className="text-2xl font-extrabold text-white tracking-tight">Access Terminal</h2>
+              <p className="text-slate-400 text-xs mt-1">Enter your account details to sign in.</p>
             </div>
 
-            <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1.5">
-                Password
-              </label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                </span>
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    setSelectedRole(null);
-                  }}
-                  placeholder="••••••••"
-                  className="w-full bg-slate-950/60 border border-slate-800 rounded-xl py-3 pl-10 pr-4 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/40 transition-all duration-200"
-                />
+            {/* Error Alert Box */}
+            {error && (
+              <div className="bg-rose-950/20 border border-rose-500/25 text-rose-400 text-xs px-4 py-3 rounded-xl flex items-start gap-2.5">
+                <svg className="w-4.5 h-4.5 mt-0.5 flex-shrink-0 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                  <span className="font-bold">Connection/Authentication Error:</span> {error}
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Submissions & Bypass Options */}
-            <div className="space-y-2.5 pt-2">
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white py-3 rounded-xl text-sm font-extrabold tracking-wide hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-250 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            {/* Login Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1.5">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206" />
                     </svg>
-                    <span>Connecting to Server...</span>
-                  </>
-                ) : (
-                  <span>Sign In (Online API)</span>
-                )}
-              </button>
+                  </span>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setSelectedRole(null);
+                    }}
+                    placeholder="cashier@example.com"
+                    className="w-full bg-slate-950/60 border border-slate-800 rounded-xl py-3 pl-10 pr-4 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/40 transition-all duration-200"
+                  />
+                </div>
+              </div>
 
-              <button
-                type="button"
-                onClick={handleDemoBypass}
-                className="w-full bg-slate-900 border border-slate-800 hover:border-slate-700/80 text-slate-300 hover:text-white py-3 rounded-xl text-sm font-extrabold tracking-wide hover:bg-slate-800/40 transition-all duration-250 flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <span>Bypass & Log In (Local Demo Mode)</span>
-                <span className="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded uppercase font-bold tracking-widest border border-indigo-500/20">
-                  Offline
-                </span>
-              </button>
-            </div>
-          </form>
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1.5">
+                  Password
+                </label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                  </span>
+                  <input
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setSelectedRole(null);
+                    }}
+                    placeholder="••••••••"
+                    className="w-full bg-slate-950/60 border border-slate-800 rounded-xl py-3 pl-10 pr-4 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/40 transition-all duration-200"
+                  />
+                </div>
+              </div>
+
+              {/* Submissions & Bypass Options */}
+              <div className="space-y-2.5 pt-2">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white py-3 rounded-xl text-sm font-extrabold tracking-wide hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-250 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span>Connecting to Server...</span>
+                    </>
+                  ) : (
+                    <span>Sign In (Online API)</span>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleDemoBypass}
+                  className="w-full bg-slate-900 border border-slate-800 hover:border-slate-700/80 text-slate-300 hover:text-white py-3 rounded-xl text-sm font-extrabold tracking-wide hover:bg-slate-800/40 transition-all duration-250 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <span>Bypass & Log In (Local Demo Mode)</span>
+                  <span className="text-[9px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded uppercase font-bold tracking-widest border border-indigo-500/20">
+                    Offline
+                  </span>
+                </button>
+              </div>
+            </form>
+          </div>
 
           {/* Toast Notification for Bypass Mode */}
           {showDemoToast && (

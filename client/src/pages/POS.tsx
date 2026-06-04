@@ -4,6 +4,7 @@ import useCart from '../hooks/useCart';
 import productService from '../services/productService';
 import orderService from '../services/orderService';
 import ProductCard from '../components/ProductCard';
+import { getImageUrl } from '../services/api';
 import type { Product, Variant, CartItem } from '../types/product.types';
 
 export const POS: React.FC = () => {
@@ -29,24 +30,38 @@ export const POS: React.FC = () => {
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Search products on term change
-  useEffect(() => {
-    const delayDebounce = setTimeout(async () => {
+  const fetchPOSProducts = useCallback(async (search: string, isBackground = false) => {
+    if (!isBackground) {
       setLoadingProducts(true);
-      try {
-        const data = await productService.getAll({ search: searchTerm });
-        console.log('Fetched products data:', data); // Debugging line to check products data
-        // Filter out inactive products
-        setProducts(data.filter((p: Product) => p.isActive));
-      } catch (err) {
-        console.error('Error fetching products', err);
-      } finally {
+    }
+    try {
+      const data = await productService.getAll({ search });
+      setProducts(data.filter((p: Product) => p.isActive !== false));
+    } catch (err) {
+      console.error('Error fetching products', err);
+    } finally {
+      if (!isBackground) {
         setLoadingProducts(false);
       }
-    }, 300); // 300ms debounce
+    }
+  }, []);
 
-    return () => clearTimeout(delayDebounce);
-  }, [searchTerm]);
+  // Search products on term change & setup polling
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      fetchPOSProducts(searchTerm, false);
+    }, 300);
+
+    // Setup real-time polling every 5 seconds
+    const interval = setInterval(() => {
+      fetchPOSProducts(searchTerm, true);
+    }, 5000);
+
+    return () => {
+      clearTimeout(delayDebounce);
+      clearInterval(interval);
+    };
+  }, [searchTerm, fetchPOSProducts]);
 
   // Helper to trigger alert that vanishes after 5s
   const showAlert = useCallback((type: 'success' | 'error', message: string) => {
@@ -292,7 +307,7 @@ export const POS: React.FC = () => {
                       <div className="flex items-center gap-2.5 min-w-0">
                         {item.image ? (
                           <img
-                            src={item.image}
+                            src={getImageUrl(item.image)}
                             alt={item.name}
                             className="w-10 h-10 object-cover rounded-lg border border-slate-800 bg-slate-950 flex-shrink-0"
                           />
