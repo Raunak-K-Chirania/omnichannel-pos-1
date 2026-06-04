@@ -94,27 +94,9 @@ const getProducts = async (
       limit = 20,
     } = req.query;
 
-    // Create cache key
-    const cacheKey =
-      `${CACHE_PREFIX}${JSON.stringify(req.query)}`;
-
-    // Check Redis cache
-    let cachedData = null;
-    try {
-      cachedData = await redisClient.get(cacheKey);
-    } catch (err) {
-      console.error("Redis get cache failed:", err);
-    }
-
-    // Cache hit
-    if (cachedData) {
-      res.json(JSON.parse(cachedData));
-      return;
-    }
-
     // MongoDB query
     const query: Record<string, any> = {
-      isActive: true,
+      isActive: { $ne: false },
     };
 
     // Full text search fallback to regex
@@ -158,17 +140,6 @@ const getProducts = async (
       products,
       nextCursor,
     };
-
-    // Store in Redis
-    try {
-      await redisClient.setex(
-        cacheKey,
-        CACHE_TTL,
-        JSON.stringify(result)
-      );
-    } catch (err) {
-      console.error("Redis set cache failed:", err);
-    }
 
     res.json(result);
 

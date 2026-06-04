@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 import productService from '../services/productService';
@@ -21,40 +21,55 @@ export const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async (isBackground = false) => {
+    if (!isBackground) {
       setLoading(true);
-      setError(null);
+    }
+    setError(null);
+    try {
+      // Fetch products count
+      const productsData = await productService.getAll();
+      setProductsCount(productsData.length);
+
+      // Fetch low stock items count
       try {
-        // Fetch products count
-        const productsData = await productService.getAll();
-        setProductsCount(productsData.length);
+        const lowStockData = await inventoryService.getLowStock();
+        setLowStockCount(lowStockData.length);
+      } catch (invErr) {
+        console.warn('Could not fetch low-stock count directly. Trying fallback.', invErr);
+        // If the role restricts getLowStock, we fall back to 0 or count from store
+        setLowStockCount(0);
+      }
 
-        // Fetch low stock items count
-        try {
-          const lowStockData = await inventoryService.getLowStock();
-          setLowStockCount(lowStockData.length);
-        } catch (invErr) {
-          console.warn('Could not fetch low-stock count directly. Trying fallback.', invErr);
-          // If the role restricts getLowStock, we fall back to 0 or count from store
-          setLowStockCount(0);
-        }
-
-        // Fetch recent orders
-        const ordersData = await orderService.getAll();
-        //console.log('Fetched orders data:', ordersData); // Debugging line to check orders data
-        setRecentOrders(ordersData || []);
-      } catch (err: unknown) {
-        console.error('Error loading dashboard data', err);
-        const axiosError = err as { response?: { data?: { message?: string } } };
-        setError(axiosError.response?.data?.message || 'Failed to fetch dashboard overview metrics.');
-      } finally {
+      // Fetch recent orders
+      const ordersData = await orderService.getAll();
+      setRecentOrders(ordersData || []);
+    } catch (err: unknown) {
+      console.error('Error loading dashboard data', err);
+      const axiosError = err as { response?: { data?: { message?: string } } };
+      setError(axiosError.response?.data?.message || 'Failed to fetch dashboard overview metrics.');
+    } finally {
+      if (!isBackground) {
         setLoading(false);
       }
-    };
-
-    fetchDashboardData();
+    }
   }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchDashboardData(false);
+    }, 0);
+
+    // Setup real-time polling every 5 seconds
+    const interval = setInterval(() => {
+      fetchDashboardData(true);
+    }, 5000);
+
+    return () => {
+      clearTimeout(timer);
+      clearInterval(interval);
+    };
+  }, [fetchDashboardData]);
 
   const totalSales = Array.isArray(recentOrders)
     ? recentOrders.reduce((sum, order) => sum + (order.total || 0), 0)

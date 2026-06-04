@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import useAuth from '../hooks/useAuth';
 import productService from '../services/productService';
-import api from '../services/api';
+import api, { getImageUrl } from '../services/api';
 import type { Product, Variant } from '../types/product.types';
 
 export const Products: React.FC = () => {
@@ -26,29 +26,40 @@ export const Products: React.FC = () => {
   const [modalError, setModalError] = useState<string | null>(null);
 
   // Fetch products
-  const fetchProducts = async (search?: string) => {
-    setLoading(true);
+  const fetchProducts = useCallback(async (search?: string, isBackground = false) => {
+    if (!isBackground) {
+      setLoading(true);
+    }
     setError(null);
     try {
       const data = await productService.getAll({ search });
-     // console.log('Fetched products data:', data); // Debugging line to check products data
       setProducts(data || []);
     } catch (err: unknown) {
       console.error(err);
       const axiosError = err as { response?: { data?: { message?: string } } };
       setError(axiosError.response?.data?.message || 'Failed to retrieve products catalog.');
     } finally {
-      setLoading(false);
+      if (!isBackground) {
+        setLoading(false);
+      }
     }
-  };
+  }, []);
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      fetchProducts(searchTerm);
+      fetchProducts(searchTerm, false);
     }, 300);
 
-    return () => clearTimeout(delayDebounce);
-  }, [searchTerm]);
+    // Setup real-time polling every 5 seconds
+    const interval = setInterval(() => {
+      fetchProducts(searchTerm, true);
+    }, 5000);
+
+    return () => {
+      clearTimeout(delayDebounce);
+      clearInterval(interval);
+    };
+  }, [searchTerm, fetchProducts]);
 
   const handleAddVariantRow = () => {
     setVariants([...variants, { size: 'L', color: 'White', price: 29.99, stock: 25 }]);
@@ -276,7 +287,7 @@ export const Products: React.FC = () => {
                         <div className="flex items-center gap-3">
                           {product.image ? (
                             <img
-                              src={product.image}
+                              src={getImageUrl(product.image)}
                               alt={product.name}
                               className="w-10 h-10 object-cover rounded-lg border border-slate-800 bg-slate-950 flex-shrink-0"
                             />
@@ -454,7 +465,7 @@ export const Products: React.FC = () => {
                   {imagePath ? (
                     <div className="relative group w-16 h-16 rounded-lg overflow-hidden border border-slate-800">
                       <img
-                        src={imagePath}
+                        src={getImageUrl(imagePath)}
                         alt="Preview"
                         className="w-full h-full object-cover"
                       />

@@ -210,6 +210,9 @@ Successfully tested:
 ✅ Redis Connected
 ✅ API Testing Completed
 
+## LIVE LINK FOR BACKEND
+https://omnichannel-pos-1.onrender.com
+
 
 ## 👨‍💻 Author
 
