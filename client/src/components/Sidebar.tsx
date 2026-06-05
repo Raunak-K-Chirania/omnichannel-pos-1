@@ -2,7 +2,12 @@ import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 
-export const Sidebar: React.FC = () => {
+interface SidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
   const { user } = useAuth();
   //console.log('Current user in Sidebar:', user);
  // Debugging line to check user state
@@ -66,47 +71,75 @@ export const Sidebar: React.FC = () => {
   );
 
   return (
-    <aside className="w-64 bg-slate-900/40 backdrop-blur-md border-r border-slate-800/80 hidden md:flex flex-col justify-between py-6 px-4 select-none">
-      <div className="flex flex-col space-y-1.5">
-        <div className="px-3 mb-4 text-xs font-semibold text-slate-500 uppercase tracking-widest">
-          Navigation
-        </div>
-        {filteredMenuItems.map((item) => {
-          const isActive = location.pathname === item.path;
-          return (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={`flex items-center space-x-3 px-3 py-3 rounded-xl transition-all duration-200 group border-l-2 font-medium ${
-                isActive
-                  ? 'bg-gradient-to-r from-violet-600/15 to-indigo-600/15 text-indigo-400 border-indigo-500'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 border-transparent'
-              }`}
-            >
-              <span className={`transition-transform duration-200 group-hover:scale-105 ${
-                isActive ? 'text-indigo-400' : 'text-slate-400 group-hover:text-slate-300'
-              }`}>
-                {item.icon}
-              </span>
-              <span className="text-sm">{item.name}</span>
-            </NavLink>
-          );
-        })}
-      </div>
-      
-      {/* Footer Info or helper indicator */}
-      {user && (
-        <div className="p-3 bg-slate-800/50 rounded-2xl border border-slate-800/60 flex items-center space-x-3">
-          <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-slate-300 border border-slate-700 shadow-sm text-sm uppercase">
-            {user.name ? user.name.charAt(0) : '?'}
-          </div>
-          <div className="flex flex-col min-w-0">
-            <span className="text-xs font-semibold text-slate-300 truncate">{user.name || 'User'}</span>
-            <span className="text-[10px] text-slate-500 truncate capitalize">{(user.role || 'Guest')} Account</span>
-          </div>
-        </div>
+    <>
+      {/* Mobile Backdrop */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-sm md:hidden"
+          onClick={onClose}
+        />
       )}
-    </aside>
+
+      <aside className={`
+        fixed inset-y-0 left-0 z-50 w-64 bg-slate-950 border-r border-slate-900/80 py-6 px-4 flex flex-col justify-between select-none transition-transform duration-300 ease-in-out
+        md:static md:translate-x-0 md:flex md:w-64 md:bg-slate-900/40 md:backdrop-blur-md md:border-r md:border-slate-800/80
+        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
+        <div className="flex flex-col space-y-1.5">
+          <div className="flex items-center justify-between px-3 mb-4">
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
+              Navigation
+            </span>
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="md:hidden text-slate-500 hover:text-slate-300 focus:outline-none cursor-pointer"
+                aria-label="Close menu"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+          {filteredMenuItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                onClick={onClose}
+                className={`flex items-center space-x-3 px-3 py-3 rounded-xl transition-all duration-200 group border-l-2 font-medium ${
+                  isActive
+                    ? 'bg-gradient-to-r from-violet-600/15 to-indigo-600/15 text-indigo-400 border-indigo-500'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 border-transparent'
+                }`}
+              >
+                <span className={`transition-transform duration-200 group-hover:scale-105 ${
+                  isActive ? 'text-indigo-400' : 'text-slate-400 group-hover:text-slate-300'
+                }`}>
+                  {item.icon}
+                </span>
+                <span className="text-sm">{item.name}</span>
+              </NavLink>
+            );
+          })}
+        </div>
+        
+        {/* Footer Info or helper indicator */}
+        {user && (
+          <div className="p-3 bg-slate-800/50 rounded-2xl border border-slate-800/60 flex items-center space-x-3">
+            <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center font-bold text-slate-300 border border-slate-700 shadow-sm text-sm uppercase">
+              {user.name ? user.name.charAt(0) : '?'}
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-xs font-semibold text-slate-300 truncate">{user.name || 'User'}</span>
+              <span className="text-[10px] text-slate-500 truncate capitalize">{(user.role || 'Guest')} Account</span>
+            </div>
+          </div>
+        )}
+      </aside>
+    </>
   );
 };
 

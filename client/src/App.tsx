@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import type { AppDispatch } from './store';
@@ -18,12 +18,14 @@ import Orders from './pages/Orders';
 
 // Layout for Private Pages
 const AppLayout: React.FC = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 font-sans">
       <OfflineBanner />
-      <Navbar />
+      <Navbar onMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)} />
       <div className="flex flex-1">
-        <Sidebar />
+        <Sidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
         <main className="flex-1 p-5 md:p-8 overflow-y-auto w-full">
           <Outlet />
         </main>
