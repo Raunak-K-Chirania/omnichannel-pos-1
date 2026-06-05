@@ -210,13 +210,12 @@ Successfully tested:
 ✅ Redis Connected
 ✅ API Testing Completed
 
-## LIVE LINK FOR BACKEND
+## LIVE LINK FOR BACKEND & FRONTEND
 https://omnichannel-pos-1.onrender.com
-
+https://omnichannel-pos-1-alpha.vercel.app
 
 ## 👨‍💻 Author
-
 Raunak Chirania
 Gurnoor Singh
 Akshay Sharma
-Aman Thakur
+Aman R. Thakur

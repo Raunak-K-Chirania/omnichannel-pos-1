@@ -1,6 +1,23 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || '';
+const getBaseApiUrl = (): string => {
+  let url = import.meta.env.VITE_API_URL || '';
+  
+  if (typeof window !== 'undefined' && window.location.hostname) {
+    // If the site is accessed via an IP address or hostname other than localhost,
+    // and the API URL is set to localhost/127.0.0.1, redirect API calls to the hosting machine's IP.
+    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      if (url.includes('localhost')) {
+        url = url.replace('localhost', window.location.hostname);
+      } else if (url.includes('127.0.0.1')) {
+        url = url.replace('127.0.0.1', window.location.hostname);
+      }
+    }
+  }
+  return url;
+};
+
+const API_URL = getBaseApiUrl();
 
 export const getBackendUrl = (): string => {
   return API_URL;
@@ -8,10 +25,29 @@ export const getBackendUrl = (): string => {
 
 export const getImageUrl = (imagePath?: string): string => {
   if (!imagePath) return '';
-  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-    return imagePath;
+  
+  let resolvedUrl = imagePath;
+  if (resolvedUrl.startsWith('http://') || resolvedUrl.startsWith('https://')) {
+    if (typeof window !== 'undefined' && window.location.hostname && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      if (resolvedUrl.includes('localhost')) {
+        resolvedUrl = resolvedUrl.replace('localhost', window.location.hostname);
+      } else if (resolvedUrl.includes('127.0.0.1')) {
+        resolvedUrl = resolvedUrl.replace('127.0.0.1', window.location.hostname);
+      }
+    }
+    return resolvedUrl;
   }
-  return `${API_URL}${imagePath}`;
+  
+  let baseUrl = API_URL;
+  if (typeof window !== 'undefined' && window.location.hostname && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    if (baseUrl.includes('localhost')) {
+      baseUrl = baseUrl.replace('localhost', window.location.hostname);
+    } else if (baseUrl.includes('127.0.0.1')) {
+      baseUrl = baseUrl.replace('127.0.0.1', window.location.hostname);
+    }
+  }
+  
+  return `${baseUrl}${resolvedUrl}`;
 };
 
 const api = axios.create({
