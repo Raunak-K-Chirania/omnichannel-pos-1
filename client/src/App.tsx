@@ -10,11 +10,45 @@ import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import OfflineBanner from './components/OfflineBanner'; // Network status banner
 import Login from './pages/Login';
+import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import POS from './pages/POS';
 import Products from './pages/Products';
 import Inventory from './pages/Inventory';
 import Orders from './pages/Orders';
+import Users from './pages/Users';
+
+// Customer Pages
+import CustomerDashboard from './pages/CustomerDashboard';
+import CustomerProducts from './pages/CustomerProducts';
+import CustomerProductDetails from './pages/CustomerProductDetails';
+import CustomerProfile from './pages/CustomerProfile';
+
+// Placeholder Pages for Menu Mappings
+
+const ReportsPlaceholder: React.FC = () => (
+  <div className="bg-slate-900/40 border border-slate-800 p-8 rounded-2xl text-center">
+    <h1 className="text-xl font-extrabold text-white">Analytics & Reports</h1>
+    <p className="text-xs text-slate-500 mt-2">Omnichannel store analytics, sales tracking, and margin analysis. (Manager & Admin View)</p>
+  </div>
+);
+
+// Dynamic Resolvers based on User Role
+const DashboardResolver: React.FC = () => {
+  const { user } = useAuth();
+  if (user?.role === 'customer') {
+    return <CustomerDashboard />;
+  }
+  return <Dashboard />;
+};
+
+const ProductsResolver: React.FC = () => {
+  const { user } = useAuth();
+  if (user?.role === 'customer') {
+    return <CustomerProducts />;
+  }
+  return <Products />;
+};
 
 // Layout for Private Pages
 const AppLayout: React.FC = () => {
@@ -42,7 +76,7 @@ const PrivateRoute: React.FC = () => {
 
 // Route wrapper for Role Based Access Control
 interface RoleRouteProps {
-  allowedRoles: Array<'cashier' | 'manager' | 'admin'>;
+  allowedRoles: Array<'cashier' | 'manager' | 'admin' | 'customer'>;
 }
 
 const RoleRoute: React.FC<RoleRouteProps> = ({ allowedRoles }) => {
@@ -99,18 +133,40 @@ export const App: React.FC = () => {
       <Routes>
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
         {/* Private Routes wrapped in layout */}
         <Route element={<PrivateRoute />}>
           <Route element={<AppLayout />}>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/pos" element={<POS />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/orders" element={<Orders />} />
+            {/* Dynamic Root & Catalog Resolvers */}
+            <Route path="/" element={<DashboardResolver />} />
+            <Route path="/products" element={<ProductsResolver />} />
             
+            {/* Customer Only Routes */}
+            <Route element={<RoleRoute allowedRoles={['customer']} />}>
+              <Route path="/profile" element={<CustomerProfile />} />
+              <Route path="/products/:id" element={<CustomerProductDetails />} />
+            </Route>
+
+            {/* Cashier Only Routes */}
+            <Route element={<RoleRoute allowedRoles={['cashier']} />}>
+              <Route path="/pos" element={<POS />} />
+            </Route>
+
+            {/* Staff Common Routes */}
+            <Route element={<RoleRoute allowedRoles={['cashier', 'manager', 'admin']} />}>
+              <Route path="/orders" element={<Orders />} />
+            </Route>
+
             {/* Manager and Admin Only Routes */}
             <Route element={<RoleRoute allowedRoles={['manager', 'admin']} />}>
               <Route path="/inventory" element={<Inventory />} />
+              <Route path="/reports" element={<ReportsPlaceholder />} />
+            </Route>
+
+            {/* Admin Only Routes */}
+            <Route element={<RoleRoute allowedRoles={['admin']} />}>
+              <Route path="/users" element={<Users />} />
             </Route>
           </Route>
         </Route>

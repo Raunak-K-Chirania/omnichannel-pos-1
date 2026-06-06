@@ -1,13 +1,13 @@
 import mongoose, { Document, Schema } from "mongoose";
 import bcrypt from "bcryptjs";
 
-export type UserRole = "cashier" | "manager" | "admin";
+export type UserRole = "cashier" | "manager" | "admin" | "customer";
 export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
-  role: "cashier" | "manager" | "admin";
-  store: mongoose.Types.ObjectId;
+  role: UserRole;
+  store?: mongoose.Types.ObjectId;
   matchPassword(candidatePassword: string): Promise<boolean>;
 }
 const UserSchema: Schema<IUser> = new Schema(
@@ -31,8 +31,8 @@ const UserSchema: Schema<IUser> = new Schema(
     },
     role: {
       type: String,
-      enum: ["cashier", "manager", "admin"],
-      default: "cashier",
+      enum: ["cashier", "manager", "admin", "customer"],
+      default: "customer",
     },
     store: {
       type:Schema.Types.ObjectId,

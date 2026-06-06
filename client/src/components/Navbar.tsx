@@ -25,10 +25,22 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuToggle }) => {
             Manager
           </span>
         );
-      default:
+      case 'cashier':
         return (
           <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-sm uppercase tracking-wider">
             Cashier
+          </span>
+        );
+      case 'customer':
+        return (
+          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20 shadow-sm uppercase tracking-wider">
+            Customer
+          </span>
+        );
+      default:
+        return (
+          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-500/10 text-slate-400 border border-slate-500/20 shadow-sm uppercase tracking-wider">
+            {role || 'Guest'}
           </span>
         );
     }
@@ -82,7 +94,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuToggle }) => {
         <div className="flex items-center space-x-4">
           <div className="flex flex-col items-end hidden md:flex">
             <span className="text-sm font-semibold text-slate-200">{user.name || 'User'}</span>
-            <span className="mt-0.5">{getRoleBadge(user.role || 'cashier')}</span>
+            <span className="mt-0.5">{getRoleBadge(user.role)}</span>
           </div>
           
           <div className="h-8 w-px bg-slate-800 hidden md:block"></div>

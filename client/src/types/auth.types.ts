@@ -2,7 +2,7 @@ export interface User {
   _id: string;
   name: string;
   email: string;
-  role: 'cashier' | 'manager' | 'admin';
+  role: 'cashier' | 'manager' | 'admin' | 'customer';
   store?: string;
   token: string;
 }
