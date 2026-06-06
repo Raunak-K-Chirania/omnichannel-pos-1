@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import productService from '../services/productService';
 import { getImageUrl } from '../services/api';
-import type { Product, Variant } from '../types/product.types';
+import type { Product } from '../types/product.types';
 
 export const CustomerProducts: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -19,12 +19,12 @@ export const CustomerProducts: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await productService.getAll({ search });
+      const data = await productService.getAll({ search }) as Product[];
       const activeProducts = (data || []).filter((p: Product) => p.isActive !== false);
       setProducts(activeProducts);
 
       // Extract unique categories dynamically
-      const uniqueCats = ['All', ...new Set(activeProducts.map((p: Product) => p.category))];
+      const uniqueCats: string[] = ['All', ...Array.from(new Set(activeProducts.map((p: Product) => p.category)))];
       setCategories(uniqueCats);
     } catch (err: unknown) {
       console.error(err);
