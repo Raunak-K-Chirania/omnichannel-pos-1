@@ -167,7 +167,7 @@ Successfully tested:
 ✅ Redis Connected
 ✅ API Testing Completed
 
-## LIVE LINK FOR BACKEND
+## LIVE LINK FOR BACKEND & FRONTEND
 https://omnichannel-pos-1.onrender.com
 
 ## LIVE LINK FOR BACKEND & FRONTEND
