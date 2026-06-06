@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { register, login, getMe } from '../controllers/authController';
+import { register, login, getMe, logout } from '../controllers/authController';
 import { protect } from "../middleware/authMiddleware";
 
 const router = Router();
@@ -83,5 +83,11 @@ router.post('/login', login);
  */
 // GET  /api/auth/me — Get logged-in user (protected)
 router.get("/me", protect, getMe);
+
+// GET  /api/auth/profile — Get logged-in user profile (protected)
+router.get("/profile", protect, getMe);
+
+// POST /api/auth/logout — Log out user
+router.post("/logout", logout);
 
 export default router;

@@ -26,7 +26,30 @@ export const useAuth = () => {
     }
   };
 
-  const logout = () => {
+  const register = async (name: string, email: string, password: string, role?: string) => {
+    dispatch(setLoading(true));
+    try {
+      const res = await authService.register({ name, email, password, role });
+      const formattedUser = {
+        ...res.data,
+        token: res.token,
+      };
+      dispatch(setUser(formattedUser));
+      return formattedUser;
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { data?: { message?: string } } };
+      const errMsg = axiosError.response?.data?.message || 'Registration failed';
+      dispatch(setError(errMsg));
+      throw err;
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } catch (err) {
+      console.error('Logout API request failed', err);
+    }
     dispatch(logoutAction());
   };
 
@@ -35,6 +58,7 @@ export const useAuth = () => {
     loading,
     error,
     login,
+    register,
     logout,
   };
 };

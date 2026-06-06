@@ -41,7 +41,7 @@ router.get("/", protect, getInventory);
 router.get(
   "/low-stock",
   protect,
-  authorize("admin", "manager"),
+  authorize("admin", "manager", "cashier"),
   getLowStock
 );
 

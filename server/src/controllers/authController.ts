@@ -10,6 +10,14 @@ import generateToken from '../utils/generateToken';
 export const register = async (req: Request, res: Response) => {
   const { name, email, password, role, store } = req.body;
 
+  // Validate inputs
+  if (!name || !email || !password) {
+    return res.status(400).json({
+      success: false,
+      message: 'Please provide name, email, and password',
+    });
+  }
+
   // Check if user already exists
   const existingUser = await User.findOne({ email });
   if (existingUser) {
@@ -113,5 +121,17 @@ export const getMe = async (req: Request, res: Response) => {
       role: user.role,
       store: user.store,
     },
+  });
+};
+
+/**
+ * @desc    Logout user / clear session
+ * @route   POST /api/auth/logout
+ * @access  Public
+ */
+export const logout = async (req: Request, res: Response) => {
+  res.status(200).json({
+    success: true,
+    message: 'Logged out successfully',
   });
 };
