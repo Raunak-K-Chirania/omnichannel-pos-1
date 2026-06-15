@@ -148,8 +148,8 @@ export const App: React.FC = () => {
               <Route path="/products/:id" element={<CustomerProductDetails />} />
             </Route>
 
-            {/* Cashier Only Routes */}
-            <Route element={<RoleRoute allowedRoles={['cashier']} />}>
+            {/* Cashier, Manager and Admin Routes */}
+            <Route element={<RoleRoute allowedRoles={['cashier', 'manager', 'admin']} />}>
               <Route path="/pos" element={<POS />} />
             </Route>
 
