@@ -30,10 +30,13 @@ export const Inventory: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?.store]);
+  }, [user]);
 
   useEffect(() => {
-    fetchInventory();
+    const timer = setTimeout(() => {
+      fetchInventory();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchInventory]);
 
   const handleEditClick = (item: InventoryItem) => {

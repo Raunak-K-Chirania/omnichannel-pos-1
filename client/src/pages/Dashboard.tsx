@@ -54,7 +54,7 @@ export const Dashboard: React.FC = () => {
         setLoading(false);
       }
     }
-  }, [user?.store]);
+  }, [user]);
 
   useEffect(() => {
     const timer = setTimeout(() => {

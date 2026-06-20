@@ -45,7 +45,7 @@ export const POS: React.FC = () => {
         setLoadingProducts(false);
       }
     }
-  }, [user?.store]);
+  }, [user]);
 
   // Search products on term change & setup polling
   useEffect(() => {

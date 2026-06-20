@@ -13,7 +13,7 @@ const isDemoMode = () => {
   return false;
 };
 
-const getDemoStores = () => {
+const getDemoStores = (): Array<{ _id: string; name: string; location: string; isActive: boolean; currency?: string }> => {
   const stored = localStorage.getItem('demo_stores');
   if (stored) return JSON.parse(stored);
 
@@ -23,12 +23,14 @@ const getDemoStores = () => {
       name: "Flagship Store (Demo)",
       location: "New York, NY",
       isActive: true,
+      currency: "USD",
     },
     {
       _id: "mock-store-102",
       name: "Secondary Store (Demo)",
       location: "Los Angeles, CA",
       isActive: true,
+      currency: "USD",
     },
   ];
   localStorage.setItem('demo_stores', JSON.stringify(initial));
@@ -64,7 +66,7 @@ export const storeService = {
   async update(id: string, data: { name?: string; location?: string; isActive?: boolean }) {
     if (isDemoMode()) {
       let stores = getDemoStores();
-      stores = stores.map((s: any) => (s._id === id ? { ...s, ...data } : s));
+      stores = stores.map(s => (s._id === id ? { ...s, ...data } : s));
       localStorage.setItem('demo_stores', JSON.stringify(stores));
       return { success: true };
     }
@@ -75,7 +77,7 @@ export const storeService = {
   async delete(id: string) {
     if (isDemoMode()) {
       let stores = getDemoStores();
-      stores = stores.filter((s: any) => s._id !== id);
+      stores = stores.filter(s => s._id !== id);
       localStorage.setItem('demo_stores', JSON.stringify(stores));
       return { success: true };
     }

@@ -67,8 +67,11 @@ export const Users: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchUsers();
-    fetchStores();
+    const timer = setTimeout(() => {
+      fetchUsers();
+      fetchStores();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleUpdateRole = async (e: React.FormEvent) => {

@@ -46,7 +46,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuToggle }) => {
       };
       fetchStores();
     }
-  }, [user?.role, user?.store, dispatch]);
+  }, [user, dispatch]);
 
   const getRoleBadge = (role: string) => {
     switch (role) {

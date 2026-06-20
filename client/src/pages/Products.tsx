@@ -44,7 +44,7 @@ export const Products: React.FC = () => {
         setLoading(false);
       }
     }
-  }, [user?.store]);
+  }, [user]);
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {

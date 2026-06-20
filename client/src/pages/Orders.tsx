@@ -40,10 +40,13 @@ export const Orders: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?.store]);
+  }, [user]);
 
   useEffect(() => {
-    fetchOrders();
+    const timer = setTimeout(() => {
+      fetchOrders();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchOrders]);
 
   const formatDateTime = (dateString: string) => {

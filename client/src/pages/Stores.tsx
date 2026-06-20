@@ -35,7 +35,10 @@ export const Stores: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchStores();
+    const timer = setTimeout(() => {
+      fetchStores();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleOpenAddModal = () => {

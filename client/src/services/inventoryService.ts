@@ -64,7 +64,7 @@ export const inventoryService = {
         },
       ];
       if (params?.store) {
-        return demoInv.filter((item: any) => item.store._id === params.store);
+        return demoInv.filter((item: { store: { _id: string } }) => item.store._id === params.store);
       }
       return demoInv;
     }
