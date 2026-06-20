@@ -6,6 +6,7 @@ import type { Product, Variant } from '../types/product.types';
 
 export const Products: React.FC = () => {
   const { user } = useAuth();
+  const currencySymbol = user?.currency === 'INR' ? '₹' : '$';
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +33,7 @@ export const Products: React.FC = () => {
     }
     setError(null);
     try {
-      const data = await productService.getAll({ search });
+      const data = await productService.getAll({ search, store: user?.store });
       setProducts(data || []);
     } catch (err: unknown) {
       console.error(err);
@@ -43,7 +44,7 @@ export const Products: React.FC = () => {
         setLoading(false);
       }
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
@@ -100,6 +101,21 @@ export const Products: React.FC = () => {
     setImagePath(product.image || '');
     setModalError(null);
     setIsModalOpen(true);
+  };
+
+  const handleDeleteProduct = async (id: string, name: string) => {
+    if (!window.confirm(`Are you sure you want to delete product "${name}"?`)) {
+      return;
+    }
+    setError(null);
+    try {
+      await productService.delete(id);
+      fetchProducts(searchTerm);
+    } catch (err: unknown) {
+      console.error(err);
+      const axiosError = err as { response?: { data?: { message?: string } } };
+      setError(axiosError.response?.data?.message || 'Failed to delete product.');
+    }
   };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -331,8 +347,8 @@ export const Products: React.FC = () => {
                       </td>
                       <td className="p-4 font-mono font-bold text-white">
                         {minPrice === maxPrice
-                          ? `$${minPrice.toFixed(2)}`
-                          : `$${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)}`}
+                          ? `${currencySymbol}${minPrice.toFixed(2)}`
+                          : `${currencySymbol}${minPrice.toFixed(2)} - ${currencySymbol}${maxPrice.toFixed(2)}`}
                       </td>
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-3.5">
@@ -351,6 +367,14 @@ export const Products: React.FC = () => {
                               className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 px-2.5 py-1 border border-slate-800 hover:border-slate-700 bg-slate-900/50 rounded-lg cursor-pointer transition-all"
                             >
                               Edit
+                            </button>
+                          )}
+                          {isAuthorized && (
+                            <button
+                              onClick={() => handleDeleteProduct(product._id, product.name)}
+                              className="text-[10px] font-bold text-rose-400 hover:text-rose-300 px-2.5 py-1 border border-slate-800 hover:border-slate-700 bg-slate-900/50 rounded-lg cursor-pointer transition-all animate-fadeIn"
+                            >
+                              Delete
                             </button>
                           )}
                         </div>

@@ -9,6 +9,7 @@ import type { Product, Variant, CartItem } from '../types/product.types';
 
 export const POS: React.FC = () => {
   const { user } = useAuth();
+  const currencySymbol = user?.currency === 'INR' ? '₹' : '$';
   const {
     items,
     subtotal,
@@ -35,7 +36,7 @@ export const POS: React.FC = () => {
       setLoadingProducts(true);
     }
     try {
-      const data = await productService.getAll({ search });
+      const data = await productService.getAll({ search, store: user?.store });
       setProducts(data.filter((p: Product) => p.isActive !== false));
     } catch (err) {
       console.error('Error fetching products', err);
@@ -44,7 +45,7 @@ export const POS: React.FC = () => {
         setLoadingProducts(false);
       }
     }
-  }, []);
+  }, [user]);
 
   // Search products on term change & setup polling
   useEffect(() => {
@@ -368,9 +369,9 @@ export const POS: React.FC = () => {
                       {/* Pricing Info */}
                       <div className="text-right">
                         <span className="text-slate-500 text-[10px] font-mono mr-1.5">
-                          {item.quantity} x ${item.unitPrice.toFixed(2)}
+                          {item.quantity} x {currencySymbol}{item.unitPrice.toFixed(2)}
                         </span>
-                        <span className="text-white font-extrabold font-mono">${lineTotal.toFixed(2)}</span>
+                        <span className="text-white font-extrabold font-mono">{currencySymbol}{lineTotal.toFixed(2)}</span>
                       </div>
                     </div>
                   </div>
@@ -386,15 +387,15 @@ export const POS: React.FC = () => {
           <div className="space-y-2 text-xs font-semibold text-slate-400">
             <div className="flex justify-between">
               <span>Subtotal</span>
-              <span className="text-slate-200 font-mono">${subtotal.toFixed(2)}</span>
+              <span className="text-slate-200 font-mono">{currencySymbol}{subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
               <span>Sales Tax (18%)</span>
-              <span className="text-slate-200 font-mono">${tax.toFixed(2)}</span>
+              <span className="text-slate-200 font-mono">{currencySymbol}{tax.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-sm font-extrabold text-white pt-2 border-t border-slate-800/60">
               <span>Order Total</span>
-              <span className="text-indigo-400 text-lg font-mono">${total.toFixed(2)}</span>
+              <span className="text-indigo-400 text-lg font-mono">{currencySymbol}{total.toFixed(2)}</span>
             </div>
           </div>
 
@@ -446,7 +447,7 @@ export const POS: React.FC = () => {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
-                <span>Complete Checkout (${total.toFixed(2)})</span>
+                <span>Complete Checkout ({currencySymbol}{total.toFixed(2)})</span>
               </>
             )}
           </button>

@@ -15,6 +15,7 @@ interface DashboardOrder {
 
 export const Dashboard: React.FC = () => {
   const { user } = useAuth();
+  const currencySymbol = user?.currency === 'INR' ? '₹' : '$';
   const [productsCount, setProductsCount] = useState(0);
   const [lowStockCount, setLowStockCount] = useState(0);
   const [recentOrders, setRecentOrders] = useState<DashboardOrder[]>([]);
@@ -28,12 +29,12 @@ export const Dashboard: React.FC = () => {
     setError(null);
     try {
       // Fetch products count
-      const productsData = await productService.getAll();
+      const productsData = await productService.getAll({ store: user?.store });
       setProductsCount(productsData.length);
 
       // Fetch low stock items count
       try {
-        const lowStockData = await inventoryService.getLowStock();
+        const lowStockData = await inventoryService.getLowStock({ store: user?.store });
         setLowStockCount(lowStockData.length);
       } catch (invErr) {
         console.warn('Could not fetch low-stock count directly. Trying fallback.', invErr);
@@ -42,7 +43,7 @@ export const Dashboard: React.FC = () => {
       }
 
       // Fetch recent orders
-      const ordersData = await orderService.getAll();
+      const ordersData = await orderService.getAll(user?.store);
       setRecentOrders(ordersData || []);
     } catch (err: unknown) {
       console.error('Error loading dashboard data', err);
@@ -53,7 +54,7 @@ export const Dashboard: React.FC = () => {
         setLoading(false);
       }
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -174,7 +175,7 @@ export const Dashboard: React.FC = () => {
           </div>
           <div>
             <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500 block">Total sales volume</span>
-            <span className="text-2xl font-black text-white">${totalSales.toFixed(2)}</span>
+            <span className="text-2xl font-black text-white">{currencySymbol}{totalSales.toFixed(2)}</span>
           </div>
         </div>
 
@@ -231,7 +232,7 @@ export const Dashboard: React.FC = () => {
                       <td className="py-3.5 capitalize font-bold text-slate-400">
                         {order.paymentMethod ? order.paymentMethod.replace('_', ' ') : 'N/A'}
                       </td>
-                      <td className="py-3.5 text-white font-extrabold">${order.total?.toFixed(2)}</td>
+                      <td className="py-3.5 text-white font-extrabold">{currencySymbol}{order.total?.toFixed(2)}</td>
                       <td className="py-3.5 text-right">
                         <span className="bg-emerald-950/80 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded text-[10px] font-bold">
                           {order.status || 'Completed'}

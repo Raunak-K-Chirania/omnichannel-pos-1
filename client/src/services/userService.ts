@@ -6,8 +6,8 @@ export const userService = {
     return response.data;
   },
 
-  async updateRole(userId: string, role: string) {
-    const response = await api.put(`/users/${userId}/role`, { role });
+  async updateRole(userId: string, role: string, store?: string | null) {
+    const response = await api.put(`/users/${userId}/role`, { role, store });
     return response.data;
   },
 

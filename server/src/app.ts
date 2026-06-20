@@ -9,6 +9,7 @@ import productRoutes from "./routes/productRoutes";
 import inventoryRoutes from "./routes/inventoryRoutes";
 import orderRoutes from "./routes/orderRoutes";
 import userRoutes from "./routes/userRoutes";
+import storeRoutes from "./routes/storeRoutes";
 
 // For testing in swagger UI and Postman, we need to allow CORS from all origins. In production, you should restrict this to your frontend domain.
 import swaggerUi from "swagger-ui-express";
@@ -58,6 +59,9 @@ app.use("/api/inventory", inventoryRoutes);
 app.use("/api/orders", orderRoutes);
 
 app.use("/api/users", userRoutes);
+
+app.use("/api/stores", storeRoutes);
+
 
 
 // 404 Middleware

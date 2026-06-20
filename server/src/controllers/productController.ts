@@ -90,6 +90,7 @@ const getProducts = async (
     const {
       search,
       category,
+      store,
       cursor,
       limit = 20,
     } = req.query;
@@ -112,6 +113,12 @@ const getProducts = async (
     if (category) {
       query.category = category;
     }
+
+    // Store filter
+    if (store) {
+      query.store = store;
+    }
+
 
     // Cursor based pagination
     if (cursor) {

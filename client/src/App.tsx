@@ -17,6 +17,7 @@ import Products from './pages/Products';
 import Inventory from './pages/Inventory';
 import Orders from './pages/Orders';
 import Users from './pages/Users';
+import Stores from './pages/Stores';
 
 // Customer Pages
 import CustomerDashboard from './pages/CustomerDashboard';
@@ -167,6 +168,7 @@ export const App: React.FC = () => {
             {/* Admin Only Routes */}
             <Route element={<RoleRoute allowedRoles={['admin']} />}>
               <Route path="/users" element={<Users />} />
+              <Route path="/stores" element={<Stores />} />
             </Route>
           </Route>
         </Route>

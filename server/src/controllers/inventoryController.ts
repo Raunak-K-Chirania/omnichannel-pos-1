@@ -91,11 +91,17 @@ export const getLowStock = async (
   res: Response
 ): Promise<void> => {
   try {
-    const inventory = await Inventory.find({
+    const filter: any = {
       $expr: {
         $lte: ["$quantity", "$reorderPoint"],
       },
-    })
+    };
+
+    if (req.query.store) {
+      filter.store = req.query.store;
+    }
+
+    const inventory = await Inventory.find(filter)
       .populate("product", "name category")
       .populate("store", "name");
 

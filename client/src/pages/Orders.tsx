@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import orderService from '../services/orderService';
+import useAuth from '../hooks/useAuth';
 
 interface OrderHistoryItem {
   _id: string;
@@ -19,15 +20,17 @@ interface OrderHistoryItem {
 }
 
 export const Orders: React.FC = () => {
+  const { user } = useAuth();
+  const currencySymbol = user?.currency === 'INR' ? '₹' : '$';
   const [orders, setOrders] = useState<OrderHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await orderService.getAll();
+      const data = await orderService.getAll(user?.store);
       console.log('Fetched orders data:', data); // Debugging line to check orders data
       setOrders(data);
     } catch (err: unknown) {
@@ -37,12 +40,14 @@ export const Orders: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchOrders();
-  }, []);
+    const timer = setTimeout(() => {
+      fetchOrders();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchOrders]);
 
   const formatDateTime = (dateString: string) => {
     try {
@@ -134,7 +139,7 @@ export const Orders: React.FC = () => {
                         {order.paymentMethod ? order.paymentMethod.replace('_', ' ') : 'N/A'}
                       </td>
                       <td className="p-4 font-mono font-extrabold text-white">
-                        ${order.total?.toFixed(2)}
+                        {currencySymbol}{order.total?.toFixed(2)}
                       </td>
                       <td className="p-4 text-right">
                         <span className="bg-emerald-950/80 border border-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded text-[10px] font-bold">

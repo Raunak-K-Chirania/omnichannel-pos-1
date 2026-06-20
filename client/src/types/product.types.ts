@@ -45,3 +45,13 @@ export interface InventoryItem {
   reorderPoint: number;
   lastUpdated: string;
 }
+
+export interface Store {
+  _id: string;
+  name: string;
+  location: string;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+

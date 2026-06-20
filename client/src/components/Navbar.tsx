@@ -1,7 +1,10 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import useAuth from '../hooks/useAuth';
 import type { RootState } from '../store';
+import { updateActiveStore } from '../store/authSlice';
+import storeService from '../services/storeService';
+import type { Store } from '../types/product.types';
 
 interface NavbarProps {
   onMenuToggle?: () => void;
@@ -9,7 +12,41 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ onMenuToggle }) => {
   const { user, logout } = useAuth();
+  const dispatch = useDispatch();
   const isOnline = useSelector((state: RootState) => state.cart.isOnline);
+  const [stores, setStores] = useState<Store[]>([]);
+
+  useEffect(() => {
+    if (user && user.role !== 'customer') {
+      const fetchStores = async () => {
+        try {
+          const list = await storeService.getAll();
+          // Filter to active stores (admins can see all stores, cashier/manager see active)
+          const activeList = user.role === 'admin' ? list : list.filter((s: Store) => s.isActive);
+          setStores(activeList);
+          
+          // If user.store is not set or refers to a store that doesn't exist/is deactivated, auto-select first available active store
+          if (activeList.length > 0) {
+            const hasValidStore = activeList.some((s: Store) => s._id === user.store);
+            if (!user.store || !hasValidStore) {
+              const activeStores = activeList.filter((s: Store) => s.isActive);
+              const defaultStore = activeStores.length > 0 ? activeStores[0] : activeList[0];
+              dispatch(updateActiveStore({ id: defaultStore._id, currency: defaultStore.currency }));
+            } else {
+              // Ensure currency code is synced
+              const currentStore = activeList.find((s: Store) => s._id === user.store);
+              if (currentStore && user.currency !== currentStore.currency) {
+                dispatch(updateActiveStore({ id: currentStore._id, currency: currentStore.currency }));
+              }
+            }
+          }
+        } catch (err) {
+          console.error("Failed to load stores in Navbar", err);
+        }
+      };
+      fetchStores();
+    }
+  }, [user, dispatch]);
 
   const getRoleBadge = (role: string) => {
     switch (role) {
@@ -70,6 +107,32 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuToggle }) => {
           Omnichannel POS
         </span>
       </div>
+
+      {/* Store Switcher Dropdown (Only for staff: cashier, manager, admin) */}
+      {user && user.role !== 'customer' && stores.length > 0 && (
+        <div className="flex items-center space-x-2 bg-slate-800/30 border border-slate-800/80 px-3 py-1.5 rounded-xl hover:border-slate-700 transition-colors">
+          <svg className="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
+          <select
+            value={user.store || ''}
+            onChange={(e) => {
+              const selectedStore = stores.find(s => s._id === e.target.value);
+              if (selectedStore) {
+                dispatch(updateActiveStore({ id: selectedStore._id, currency: selectedStore.currency }));
+              }
+            }}
+            className="bg-transparent border-0 text-xs font-bold text-slate-300 focus:outline-none focus:ring-0 cursor-pointer pr-2"
+          >
+            <option value="" disabled className="bg-slate-950 text-slate-500">Select Store...</option>
+            {stores.map((s) => (
+              <option key={s._id} value={s._id} className="bg-slate-950 text-slate-300 font-semibold">
+                {s.name} {!s.isActive ? '(Inactive)' : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Online / Offline Status Badge */}
       <div className="hidden sm:flex items-center">

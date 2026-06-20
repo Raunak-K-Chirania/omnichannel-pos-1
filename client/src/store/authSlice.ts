@@ -48,8 +48,15 @@ export const authSlice = createSlice({
       state.error = null;
       state.loading = false;
     },
+    updateActiveStore: (state, action: PayloadAction<{ id: string; currency: string }>) => {
+      if (state.user) {
+        state.user.store = action.payload.id;
+        state.user.currency = action.payload.currency;
+        localStorage.setItem('user', JSON.stringify(state.user));
+      }
+    },
   },
 });
 
-export const { setUser, setLoading, setError, logout } = authSlice.actions;
+export const { setUser, setLoading, setError, logout, updateActiveStore } = authSlice.actions;
 export default authSlice.reducer;

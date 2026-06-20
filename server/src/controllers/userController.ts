@@ -21,7 +21,7 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-// @desc    Update user role
+// @desc    Update user profile (role and/or store)
 // @route   PUT /api/users/:id/role
 // @access  Private (Admin only)
 export const updateUserRole = async (
@@ -29,15 +29,7 @@ export const updateUserRole = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { role } = req.body;
-
-    if (!role || !["cashier", "manager", "admin", "customer"].includes(role)) {
-      res.status(400).json({
-        success: false,
-        message: "Please provide a valid user role",
-      });
-      return;
-    }
+    const { role, store } = req.body;
 
     const user = await User.findById(req.params.id);
     if (!user) {
@@ -48,18 +40,34 @@ export const updateUserRole = async (
       return;
     }
 
-    // Update role
-    user.role = role;
+    // Update role if provided
+    if (role !== undefined) {
+      if (!["cashier", "manager", "admin", "customer"].includes(role)) {
+        res.status(400).json({
+          success: false,
+          message: "Please provide a valid user role",
+        });
+        return;
+      }
+      user.role = role;
+    }
+
+    // Update store if provided (can be null if unassigning)
+    if (store !== undefined) {
+      user.store = store ? store : undefined;
+    }
+
     await user.save();
 
     res.status(200).json({
       success: true,
-      message: "User role updated successfully",
+      message: "User profile updated successfully",
       data: {
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
+        store: user.store,
       },
     });
   } catch (error: any) {

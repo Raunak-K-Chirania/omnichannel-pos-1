@@ -50,9 +50,9 @@ export const inventoryService = {
     return response.data.data || [];
   },
 
-  async getLowStock() {
+  async getLowStock(params?: { store?: string }) {
     if (isDemoMode()) {
-      return [
+      const demoInv = [
         {
           _id: "mock-inv-2",
           product: { _id: "mock-prod-1", name: "Classic Denim Jacket (Demo)", category: "Apparel" },
@@ -63,8 +63,12 @@ export const inventoryService = {
           lastUpdated: new Date().toISOString(),
         },
       ];
+      if (params?.store) {
+        return demoInv.filter((item: { store: { _id: string } }) => item.store._id === params.store);
+      }
+      return demoInv;
     }
-    const response = await api.get('/inventory/low-stock');
+    const response = await api.get('/inventory/low-stock', { params });
     return response.data.data || [];
   },
 

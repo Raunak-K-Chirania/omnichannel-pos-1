@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import useAuth from '../hooks/useAuth';
 import inventoryService from '../services/inventoryService';
 import type { InventoryItem } from '../types/product.types';
@@ -16,11 +16,11 @@ export const Inventory: React.FC = () => {
   const [editPending, setEditPending] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
 
-  const fetchInventory = async () => {
+  const fetchInventory = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await inventoryService.getAll();
+      const data = await inventoryService.getAll({ store: user?.store });
       //console.log('Fetched inventory data:', data); // Debugging line to check inventory data
       setInventory(data);
     } catch (err: unknown) {
@@ -30,12 +30,14 @@ export const Inventory: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchInventory();
-  }, []);
+    const timer = setTimeout(() => {
+      fetchInventory();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchInventory]);
 
   const handleEditClick = (item: InventoryItem) => {
     setEditingItem(item);
