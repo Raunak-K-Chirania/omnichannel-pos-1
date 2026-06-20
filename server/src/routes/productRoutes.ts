@@ -138,11 +138,11 @@ router.put(
 );
 
 /**
- * DELETE PRODUCT (admin only)
+ * DELETE PRODUCT (manager, admin)
  */
 router.delete(
   "/:id",
-  authorize("admin"),
+  authorize("manager", "admin"),
   productController.deleteProduct
 );
 

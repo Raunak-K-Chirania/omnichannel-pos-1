@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import useAuth from '../hooks/useAuth';
 import userService from '../services/userService';
+import storeService from '../services/storeService';
+import type { Store } from '../types/product.types';
 
 interface UserRecord {
   _id: string;
@@ -8,6 +10,10 @@ interface UserRecord {
   email: string;
   role: 'admin' | 'manager' | 'cashier' | 'customer';
   createdAt: string;
+  store?: {
+    _id: string;
+    name: string;
+  } | null;
 }
 
 export const Users: React.FC = () => {
@@ -24,6 +30,8 @@ export const Users: React.FC = () => {
   // Edit Role Modal/State
   const [editingUser, setEditingUser] = useState<UserRecord | null>(null);
   const [newRole, setNewRole] = useState<string>('');
+  const [newStore, setNewStore] = useState<string>('');
+  const [stores, setStores] = useState<Store[]>([]);
   const [rolePending, setRolePending] = useState(false);
 
   // Delete Confirmation State
@@ -49,9 +57,18 @@ export const Users: React.FC = () => {
     }
   };
 
+  const fetchStores = async () => {
+    try {
+      const list = await storeService.getAll();
+      setStores(list.filter((s: Store) => s.isActive));
+    } catch (err) {
+      console.error('Failed to retrieve stores in Users list', err);
+    }
+  };
+
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchUsers();
+    fetchStores();
   }, []);
 
   const handleUpdateRole = async (e: React.FormEvent) => {
@@ -63,14 +80,14 @@ export const Users: React.FC = () => {
     setSuccess(null);
 
     try {
-      await userService.updateRole(editingUser._id, newRole);
-      setSuccess(`Updated ${editingUser.name}'s role to ${newRole} successfully.`);
+      await userService.updateRole(editingUser._id, newRole, newStore || null);
+      setSuccess(`Updated ${editingUser.name}'s account settings successfully.`);
       setEditingUser(null);
       fetchUsers();
     } catch (err: unknown) {
       console.error(err);
       const axiosError = err as { response?: { data?: { message?: string } } };
-      setError(axiosError.response?.data?.message || 'Failed to update user role permissions.');
+      setError(axiosError.response?.data?.message || 'Failed to update user profile.');
     } finally {
       setRolePending(false);
     }
@@ -230,6 +247,7 @@ export const Users: React.FC = () => {
                   <th className="p-4">Name</th>
                   <th className="p-4">Email</th>
                   <th className="p-4">Role Badge</th>
+                  <th className="p-4">Assigned Store</th>
                   <th className="p-4">Registered Date</th>
                   <th className="p-4 text-right">Actions</th>
                 </tr>
@@ -244,6 +262,15 @@ export const Users: React.FC = () => {
                       </td>
                       <td className="p-4 text-slate-400 font-mono text-[11px]">{u.email}</td>
                       <td className="p-4">{getRoleBadge(u.role)}</td>
+                      <td className="p-4">
+                        {u.store ? (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shadow-sm uppercase tracking-wider">
+                            {u.store.name}
+                          </span>
+                        ) : (
+                          <span className="text-slate-500 italic text-[11px]">Global / None</span>
+                        )}
+                      </td>
                       <td className="p-4 text-slate-500">
                         {new Date(u.createdAt).toLocaleDateString(undefined, {
                           year: 'numeric',
@@ -256,6 +283,7 @@ export const Users: React.FC = () => {
                           onClick={() => {
                             setEditingUser(u);
                             setNewRole(u.role);
+                            setNewStore(u.store?._id || '');
                           }}
                           className="text-xs font-bold text-indigo-400 hover:text-indigo-300 px-2.5 py-1.5 border border-slate-800 hover:border-slate-700 bg-slate-900/50 rounded-lg cursor-pointer transition-all"
                         >
@@ -316,6 +344,24 @@ export const Users: React.FC = () => {
                   <option value="manager">Manager</option>
                   <option value="cashier">Cashier</option>
                   <option value="customer">Customer</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-1.5">
+                  Assign Store Outlet
+                </label>
+                <select
+                  value={newStore}
+                  onChange={(e) => setNewStore(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-indigo-600 cursor-pointer"
+                >
+                  <option value="">No Store Assigned (Global / None)</option>
+                  {stores.map((s) => (
+                    <option key={s._id} value={s._id}>
+                      {s.name} ({s.location})
+                    </option>
+                  ))}
                 </select>
               </div>
 

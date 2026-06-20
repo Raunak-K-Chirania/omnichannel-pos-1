@@ -21,6 +21,7 @@ export const seedDatabase = async () => {
 
       if (store) {
         store.name = "Omnichannel POS Flagship Store";
+        store.currency = "USD";
         await store.save();
         console.log(`Updated existing store name to: ${store.name}`);
       } else {
@@ -29,12 +30,30 @@ export const seedDatabase = async () => {
           name: "Omnichannel POS Flagship Store",
           location: "New York, NY",
           isActive: true,
+          currency: "USD",
         });
 
         console.log(`Default store created: ${store.name}`);
       }
     } else {
       console.log(`Found flagship store: ${store.name}`);
+    }
+
+    // Seed a secondary Indian store with INR currency out of the box
+    let indianStore = await Store.findOne({
+      name: "Omnichannel POS Mumbai Hub",
+    });
+
+    if (!indianStore) {
+      indianStore = await Store.create({
+        name: "Omnichannel POS Mumbai Hub",
+        location: "Mumbai, MH, India",
+        isActive: true,
+        currency: "INR",
+      });
+      console.log(`Indian store created: ${indianStore.name}`);
+    } else {
+      console.log(`Found Indian store: ${indianStore.name}`);
     }
 
     // =====================================================

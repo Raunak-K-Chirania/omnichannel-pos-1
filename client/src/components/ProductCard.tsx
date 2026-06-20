@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { Product, Variant } from '../types/product.types';
 import { getImageUrl } from '../services/api';
+import useAuth from '../hooks/useAuth';
 
 interface ProductCardProps {
   product: Product;
@@ -8,6 +9,8 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onAdd }) => {
+  const { user } = useAuth();
+  const currencySymbol = user?.currency === 'INR' ? '₹' : '$';
   const activeVariants = product.variants.filter((v) => v.stock > 0);
   const [selectedVariant, setSelectedVariant] = useState<Variant>(
     activeVariants.length > 0 ? activeVariants[0] : product.variants[0]
@@ -85,7 +88,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onAdd }) => {
         <div className="flex flex-col">
           <span className="text-[8px] uppercase font-bold text-slate-500">Price</span>
           <span className="text-sm font-extrabold font-mono text-indigo-400">
-            ${selectedVariant?.price.toFixed(2) || '0.00'}
+            {currencySymbol}{selectedVariant?.price.toFixed(2) || '0.00'}
           </span>
         </div>
 
